@@ -1,0 +1,18 @@
+﻿using ProductService.Application.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ProductService.Infrastructure.fakes
+{
+    public class EventBus : IEventBus
+    {
+        public Task PublishAsync(string eventName, object data)
+        {
+            Console.WriteLine($"Event: {eventName}");
+            return Task.CompletedTask;
+        }
+    }
+}

@@ -1,0 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using AuthService.Application.DTOs;
+
+namespace AuthService.Application.Interfaces
+{
+    public interface IJwtTokenGenerator
+    {
+        string GenerateAccessToken(TokenUserDto user);
+        string GenerateRefreshToken();
+    }
+}

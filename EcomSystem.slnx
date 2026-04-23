@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/AuthService/">
+    <Project Path="AuthService.Api/AuthService.Api.csproj" Id="b0ac6f27-245a-47ca-b1b1-992c440dd2fe" />
+    <Project Path="AuthService.Application/AuthService.Application.csproj" Id="255099d5-6a75-4d4d-b954-e03f994cb418" />
+    <Project Path="AuthService.Domain/AuthService.Domain.csproj" Id="b7bd2507-f1da-443c-8d62-c7e56db33f34" />
+    <Project Path="AuthService.Infrastructure/AuthService.Infrastructure.csproj" Id="c8cf99dc-e3ce-46fe-8cb7-9204f0880165" />
+  </Folder>
+  <Folder Name="/ProductService/">
+    <Project Path="ProductService.Api/ProductService.Api.csproj" Id="f8c667b9-e720-4bfa-af29-e537754e4fc9" />
+    <Project Path="ProductService.Application/ProductService.Application.csproj" Id="9675ea70-7124-434c-968d-2e3ee4c714d8" />
+    <Project Path="ProductService.Domain/ProductService.Domain.csproj" Id="b54523db-9b85-4cce-99fe-bad6e25da4ec" />
+    <Project Path="ProductService.Infrastructure/ProductService.Infrastructure.csproj" Id="e793c0a7-2bd2-40d6-b777-cd593d05238f" />
+  </Folder>
+  <Folder Name="/UserService/">
+    <Project Path="UserService.Api/UserService.Api.csproj" Id="b60f60eb-413e-4c4d-ba0f-685e6654f185" />
+    <Project Path="UserService.Application/UserService.Application.csproj" Id="9e09aa17-aafa-41c8-ba78-d4cafe444ebb" />
+    <Project Path="UserService.Domain/UserService.Domain.csproj" Id="aaf47577-45aa-417a-bafe-93fb7b55dfbf" />
+    <Project Path="UserService.Infrastructure/UserService.Infrastructure.csproj" />
+  </Folder>
+  <Project Path="Contracts/EcomSystem.Contracts.csproj" Id="2f5346d8-abca-4219-867c-97319a773582" />
+</Solution>
