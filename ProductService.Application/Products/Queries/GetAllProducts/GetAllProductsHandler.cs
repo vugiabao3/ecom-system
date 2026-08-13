@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ProductService.Application.DTO;
 
 namespace ProductService.Application.Products.Queries.GetAllProducts
 {
@@ -20,22 +21,12 @@ namespace ProductService.Application.Products.Queries.GetAllProducts
 
         public async Task<GetAllProductsResponse> Handle(GetAllProductsQuery request, CancellationToken cancellationToken)
         {
-            var (products, total) = await _productRepository.GetAllAsync(
-                request.Page,
-                request.Size,
-                request.Category,
-                request.Sort
-            );
+            var result = await _productRepository.GetAllAsync(request);
 
             return new GetAllProductsResponse
             {
-                TotalCount = total,
-                Items = products.Select(p => new ProductDto
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Price = p.Price
-                }).ToList()
+                Items = result.Items,
+                TotalCount = result.TotalCount
             };
         }
     }

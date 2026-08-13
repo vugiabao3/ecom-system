@@ -1,0 +1,178 @@
+services:
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: always
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      SA_PASSWORD: "Vgb@24062006"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+    restart: always
+
+  authservice:
+    build:
+      context: .
+      dockerfile: AuthService.Api/Dockerfile
+    container_name: authservice
+    ports:
+      - "5001:8080"
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+    depends_on:
+      - rabbitmq
+      - sqlserver
+      - userservice
+    restart: always
+
+  productservice:
+    build:
+      context: .
+      dockerfile: ProductService.Api/Dockerfile
+    container_name: productservice
+    ports:
+      - "5003:8080"
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+    depends_on:
+      - rabbitmq
+      - sqlserver
+    restart: always
+
+  orderservice:
+    build:
+      context: .
+      dockerfile: OrderService.Api/Dockerfile
+    container_name: orderservice
+    ports:
+      - "5290:8080"
+    environment:
+       ASPNETCORE_URLS: http://+:8080
+    depends_on:
+      - rabbitmq
+      - sqlserver
+      - cartservice
+      - productservice
+      - promotionservice
+    restart: always
+
+  paymentservice:
+    build:
+      context: .
+      dockerfile: PaymentService.Api/Dockerfile
+    container_name: paymentservice
+    ports:
+      - "5289:8080"
+    environment:
+       ASPNETCORE_URLS: http://+:8080
+    depends_on:
+      - rabbitmq
+      - sqlserver
+      - orderservice
+    restart: always
+
+  inventoryservice:
+    build:
+      context: .
+      dockerfile: InventoryService.Api/Dockerfile
+    container_name: inventoryservice
+    ports:
+      - "5270:8080"
+    environment:
+       ASPNETCORE_URLS: http://+:8080
+    depends_on:
+      - rabbitmq
+      - sqlserver
+    restart: always
+
+  shippingservice:
+    build:
+      context: .
+      dockerfile: ShippingService.Api/Dockerfile
+    container_name: shippingservice
+    ports:
+      - "5243:8080"
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+    depends_on:
+      - rabbitmq
+      - sqlserver
+      - orderservice
+    restart: always
+
+  cartservice:
+    build:
+      context: .
+      dockerfile: CartService.Api/Dockerfile
+    container_name: cartservice
+    ports:
+      - "5002:8080"
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+    depends_on:
+      - rabbitmq
+      - sqlserver
+      - inventoryservice
+      - productservice
+    restart: always
+
+  userservice:
+    build:
+      context: .
+      dockerfile: UserService.Api/Dockerfile
+    container_name: userservice
+    ports:
+      - "5004:8080"
+    environment:
+       ASPNETCORE_URLS: http://+:8080
+    depends_on:
+      - rabbitmq
+      - sqlserver
+    restart: always
+
+  promotionservice:
+    build:
+      context: .
+      dockerfile: PromotionService.Api/Dockerfile
+    container_name: promotionservice
+    ports:
+      - "5278:8080"
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+    depends_on:
+      - rabbitmq
+      - sqlserver
+    restart: always
+
+  notificationservice:
+    build:
+      context: .
+      dockerfile: NotificationService.Api/Dockerfile
+    container_name: notificationservice
+    ports:
+      - "5039:8080"
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+    depends_on:
+      - rabbitmq
+      - sqlserver
+    restart: always
+
+volumes:
+  sql_data:
+    name: sql_data
+
+
+
+
+    

@@ -6,11 +6,11 @@ using AuthService.Application.Refresh;
 using AuthService.Application.Register;
 using AuthService.Infrastructure.Data;
     using AuthService.Infrastructure.ExternalServices;
-using AuthService.Infrastructure.Fakes;
 using AuthService.Infrastructure.RefreshTokens;
 using AuthService.Infrastructure.Repositories;
 using AuthService.Infrastructure.ResetTokens;
 using AuthService.Infrastructure.Security;
+using AuthService.Infrastructure.Email;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +24,23 @@ var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 
 // Add services to the container.
 var key = jwtSettings["Key"];
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:5173",
+                    "http://127.0.0.1:5173",
+
+                "http://localhost:5174",
+                "http://localhost:5175"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -35,7 +52,7 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(RegisterCommandHandler).Assembly);
 });
 
-// thêm cái này để đăng ký service hash password
+// thêm cái này để đăng ký service hash passwords
 builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
 // thêm cái này fake user service
 
@@ -44,7 +61,7 @@ builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
 
 builder.Services.AddHttpClient<IUserServiceClient, UserApiClient>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5183"); // URL UserService
+    client.BaseAddress = new Uri("http://userservice:8080"); // URL UserService
 });
 
 //
@@ -124,26 +141,31 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 //thêm 
-builder.Services.AddSingleton<IEmailService, FakeEmailService>();
-// hêm 
+builder.Services.AddScoped<IEmailService,
+    GmailEmailService>();// hêm 
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("AuthDb")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-app.UseMiddleware<ExceptionMiddleware>();
 
-app.UseHttpsRedirection();
+app.UseSwagger();
+app.UseSwaggerUI();
+
+
+// app.UseHttpsRedirection();
+app.UseRouting(); // 🔥 THÊM DÒNG NÀY (RẤT QUAN TRỌNG)
+
+app.UseCors("AllowFrontend"); // 🔥 PHẢI Ở ĐÂY
+
 app.UseAuthentication();
 
 
 app.UseAuthorization();
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.MapControllers();
 

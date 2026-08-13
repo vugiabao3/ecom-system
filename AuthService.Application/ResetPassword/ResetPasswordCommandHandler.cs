@@ -54,9 +54,9 @@ namespace AuthService.Application.ResetPassword
 
         // 4. Update AUTH DB
         await _authUserRepository.UpdatePasswordAsync(authUser.Id, newHash);
-
-        // 5. Sync USER SERVICE (optional)
-        await _userService.LogoutAllDevicesAsync(authUser.Id);
+        await _authUserRepository.SaveChangesAsync();
+            // 5. Sync USER SERVICE (optional)
+            await _userService.LogoutAllDevicesAsync(authUser.Id);
 
         // 6. Delete token
         await _resetTokenStore.DeleteAsync(request.Token);

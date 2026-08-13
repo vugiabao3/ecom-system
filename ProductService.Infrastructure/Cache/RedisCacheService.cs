@@ -65,5 +65,7 @@ namespace ProductService.Infrastructure.Cache
                 // ignore
             }
         }
+
+       
     }
 }

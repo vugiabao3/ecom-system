@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using AuthService.Application.Interfaces;
 using EcomSystem.Contracts.Users;
-using MediatR;
-using AuthService.Application.Interfaces;
+
 
 namespace AuthService.Application.ChangePassword
 {
@@ -59,8 +58,8 @@ namespace AuthService.Application.ChangePassword
             await _authUserRepository.UpdatePasswordAsync(user.Id, newHashed);
             await _authUserRepository.SaveChangesAsync(); // 🔥 BẮT BUỘC
 
-            // 🔥 6. UPDATE USER SERVICE (CỰC QUAN TRỌNG)
-            await _userService.UpdatePasswordAsync(user.Id, newHashed);
+            //// 🔥 6. UPDATE USER SERVICE (CỰC QUAN TRỌNG)
+            //await _userService.UpdatePasswordAsync(user.Id, newHashed);
 
             // 🔥 7. LOGOUT ALL DEVICES (đúng chỗ)
             await _userService.LogoutAllDevicesAsync(user.Id);

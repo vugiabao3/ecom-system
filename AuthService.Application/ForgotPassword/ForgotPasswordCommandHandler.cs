@@ -33,7 +33,9 @@ public class ForgotPasswordCommandHandler
             throw new Exception("User not found");
 
         // 2. tạo reset token
-        var resetToken = Guid.NewGuid().ToString();
+        var resetToken = new Random()
+    .Next(100000, 999999)
+    .ToString();
 
         // 3. lưu vào Redis (TTL 5-15 phút)
         await _resetTokenStore.SaveAsync(resetToken, request.Email);

@@ -8,6 +8,6 @@ namespace ProductService.Application.Interfaces
 {
     public interface IEventBus
     {
-        Task PublishAsync(string eventName, object data);
+        Task PublishAsync<T>(T @event);
     }
 }

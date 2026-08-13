@@ -11,7 +11,7 @@ using ProductService.Application.Interfaces;
 using ProductService.Application.Products.Queries.GetAllProducts;
 using ProductService.Application.Products.Queries.GetProductDetail;
 using ProductService.Infrastructure.Cache;
-using ProductService.Infrastructure.fakes;
+using ProductService.Infrastructure.Messaging;
 using ProductService.Infrastructure.Persistence;
 using System.Text;
 
@@ -51,8 +51,7 @@ builder.Services.AddSwaggerGen(options =>
             new string[] {}
         }
     });
-}); builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+}); 
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 // thêm cái này
@@ -63,15 +62,34 @@ builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = "localhost:6379";
 });
-
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-builder.Services.AddScoped<IEventBus, EventBus>();
-builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<IEventBus, RabbitMQEventBus>(); builder.Services.AddHttpContextAccessor();
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(typeof(GetAllProductsHandler).Assembly);
 });
 
+// cho phép fe gọi 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy
+                .WithOrigins(
+                    "http://localhost:5173",
+                    "http://localhost:5174",
+                    "http://localhost:5175"
+                )
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
+});
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -95,15 +113,13 @@ var app = builder.Build();
 
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
-app.UseHttpsRedirection();
+app.UseSwagger();
+app.UseSwaggerUI();
+
+// app.UseHttpsRedirection();
 app.UseAuthentication(); // ⚠️ PHẢI TRƯỚC Authorization
-
+app.UseCors("AllowFrontend");
 app.UseAuthorization();
 
 app.MapControllers();

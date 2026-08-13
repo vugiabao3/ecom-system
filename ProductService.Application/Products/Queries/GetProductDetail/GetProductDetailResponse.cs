@@ -14,5 +14,6 @@ namespace ProductService.Application.Products.Queries.GetProductDetail
         public decimal Price { get; set; }
 
         public double Rating { get; set; } // từ cache
+        public string ImageUrl { get; set; }
     }
 }

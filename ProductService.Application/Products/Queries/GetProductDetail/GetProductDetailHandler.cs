@@ -42,6 +42,7 @@ namespace ProductService.Application.Products.Queries.GetProductDetail
                 Name = product.Name,
                 CategoryName = product.Category.Name,
                 Price = product.Price,
+                ImageUrl = product.ImageUrl,
 
                 // 🔥 Rating lấy từ cache riêng
                 Rating = await _cacheService.GetAsync<double?>($"rating_{product.Id}") ?? 0
