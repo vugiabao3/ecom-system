@@ -4,14 +4,24 @@ import {
 } from "react-router-dom";
 import CartIcon
 from "./CartIcon";
+import { logout } from "../services/authApi";
+import { clearAuth, getRefreshToken } from "../utils/token";
 export default function Navbar() {
 
     const navigate = useNavigate();
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        const refreshToken = getRefreshToken();
 
-        localStorage.removeItem("token");
+        try {
+            if (refreshToken) {
+                await logout({ refreshToken });
+            }
+        } catch {
+            // still clear local session
+        }
 
+        clearAuth();
         navigate("/login");
     };
 

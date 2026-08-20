@@ -37,32 +37,21 @@ namespace AuthService.Application.Login
             // 1. Get user info (public data only)
             var user = await _userService.GetUserByEmailAsync(request.Email);
 
-            if (user == null)
-            {
-                return new LoginResponse
-                {
-                    AccessToken = null,
-                    RefreshToken = null
-                };
-            }
-
-            // 2. LẤY AUTH DATA từ AUTH SERVICE (KHÔNG phải UserService)
             var authUser = await _authRepository.GetByEmailAsync(request.Email);
 
-            if (authUser == null)
-                throw new Exception("User not found in auth system");
+            if (user == null || authUser == null)
+                throw new UnauthorizedAccessException("Invalid email or password");
 
-            // 3. Verify password
             var isValid = _passwordHasher.Verify(request.Password, authUser.PasswordHash);
+            if (!isValid)
+                throw new UnauthorizedAccessException("Invalid email or password");
+
             var tokenUser = new TokenUserDto
             {
                 UserId = authUser.Id,
                 Email = authUser.Email,
                 Role = authUser.Role
             };
-
-            if (!isValid)
-                throw new Exception("Invalid password");
 
             // 4. Generate tokens
             var accessToken = _jwtTokenGenerator.GenerateAccessToken(tokenUser); // dùng public info

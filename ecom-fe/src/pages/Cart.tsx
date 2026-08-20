@@ -14,8 +14,13 @@ export default function Cart() {
     const [cart, setCart] = useState<any>(null);
 
     const fetchCart = async () => {
-        const res = await getCart();
-        setCart(res.data);
+        try {
+            const res = await getCart();
+            setCart(res.data);
+        } catch (err) {
+            console.log(err);
+            setCart({ items: [], totalPrice: 0 });
+        }
     };
 
     useEffect(() => {

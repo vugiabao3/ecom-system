@@ -39,6 +39,10 @@ namespace AuthService.Api.Middlewares
                     statusCode = HttpStatusCode.BadRequest;
                     break;
 
+                case UnauthorizedAccessException:
+                    statusCode = HttpStatusCode.Unauthorized;
+                    break;
+
                 default:
                     statusCode = HttpStatusCode.InternalServerError;
                     message = exception.Message; // 🔥 hiện lỗi thật

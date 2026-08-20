@@ -1,12 +1,10 @@
 import axios from "axios";
-
-const token = localStorage.getItem("token");
+import { attachAuthInterceptors } from "./httpInterceptors";
 
 const shippingApiClient = axios.create({
     baseURL: "http://localhost:5243",
-    headers: {
-        Authorization: `Bearer ${token}`
-    }
 });
+
+attachAuthInterceptors(shippingApiClient);
 
 export default shippingApiClient;

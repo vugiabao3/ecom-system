@@ -39,10 +39,7 @@ export default function ProductList() {
             const res = await getProducts({
 
                 Page: 1,
-                PageSize: 100,
-                CategoryId: 1,
-                MinPrice: 1,
-                MaxPrice: 999999999
+                PageSize: 100
 
             });
 
@@ -117,10 +114,7 @@ export default function ProductList() {
 
                     Page: 1,
                     PageSize: 100,
-                    CategoryId: 1,
-                    MinPrice: 1,
-                    MaxPrice: 999999999,
-                    SortBy: sort
+                    ...(sort ? { SortBy: sort } : {})
 
                 });
 

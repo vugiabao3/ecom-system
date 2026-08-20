@@ -9,6 +9,8 @@ using AuthService.Application.ResetPassword;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 namespace AuthService.Api.Controllers
 {
     [ApiController]
@@ -54,9 +56,17 @@ namespace AuthService.Api.Controllers
         }
 
         [HttpPost("change-password")]
-        [AllowAnonymous]
-        public async Task<IActionResult> ChangePassword(ChangePasswordCommand command)
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
         {
+            var email =
+                User.FindFirstValue(ClaimTypes.Email)
+                ?? User.FindFirstValue(JwtRegisteredClaimNames.Email);
+
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized();
+
+            command.Email = email;
             var result = await _mediator.Send(command);
             return Ok(result);
         }

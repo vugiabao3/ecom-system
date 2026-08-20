@@ -1,21 +1,10 @@
 import axios from "axios";
+import { attachAuthInterceptors } from "./httpInterceptors";
 
 const orderApiClient = axios.create({
-    baseURL: "http://localhost:5290"
+    baseURL: "http://localhost:5290",
 });
 
-orderApiClient.interceptors.request.use(config => {
-
-    const token =
-        localStorage.getItem("token");
-
-    if (token) {
-
-        config.headers.Authorization =
-            `Bearer ${token}`;
-    }
-
-    return config;
-});
+attachAuthInterceptors(orderApiClient);
 
 export default orderApiClient;

@@ -1,6 +1,7 @@
 ﻿using OrderService.Application.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
@@ -18,7 +19,9 @@ namespace OrderService.Infrastructure.Services
         }
 
         public string UserId =>
-            _http.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            _http.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? _http.HttpContext?.User?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+            ?? _http.HttpContext?.User?.FindFirst("sub")?.Value;
 
         public string Role =>
             _http.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value;

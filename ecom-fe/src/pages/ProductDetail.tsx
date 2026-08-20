@@ -95,11 +95,15 @@ export default function ProductDetail() {
         } catch (err) {
 
             console.log(err);
+            setInventory({
+                available: 0,
+                reserved: 0
+            });
 
         }
     };
 
-    if (!product || !inventory) {
+    if (!product) {
 
         return <h1>Loading...</h1>;
     }
@@ -133,13 +137,13 @@ export default function ProductDetail() {
                     <h3>
                         Available:
                         {" "}
-                        {inventory?.available??0}
+                        {inventory?.available ?? 0}
                     </h3>
 
                     <h3>
                         Reserved:
                         {" "}
-                        {inventory.reserved}
+                        {inventory?.reserved ?? 0}
                     </h3>
 
                 </div>
@@ -163,7 +167,7 @@ export default function ProductDetail() {
                     <AddToCartModal
                         productId={product.id}
                         available={
-                            inventory?.available??0
+                            inventory?.available ?? 0
                         }
                         onClose={() =>
                             setShowModal(false)

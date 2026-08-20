@@ -82,8 +82,11 @@ builder.Services.AddCors(options =>
             policy
                 .WithOrigins(
                     "http://localhost:5173",
+                    "http://127.0.0.1:5173",
                     "http://localhost:5174",
-                    "http://localhost:5175"
+                    "http://127.0.0.1:5174",
+                    "http://localhost:5175",
+                    "http://127.0.0.1:5175"
                 )
                 .AllowAnyHeader()
                 .AllowAnyMethod()
@@ -118,8 +121,8 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 // app.UseHttpsRedirection();
-app.UseAuthentication(); // ⚠️ PHẢI TRƯỚC Authorization
 app.UseCors("AllowFrontend");
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

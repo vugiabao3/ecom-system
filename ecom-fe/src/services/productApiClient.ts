@@ -1,25 +1,10 @@
 import axios from "axios";
+import { attachAuthInterceptors } from "./httpInterceptors";
 
 const productApiClient = axios.create({
-
     baseURL: "http://localhost:5003",
-
 });
 
-productApiClient.interceptors.request.use(
-    (config) => {
-
-        const token =
-            localStorage.getItem("token");
-
-        if (token) {
-
-            config.headers.Authorization =
-                `Bearer ${token}`;
-        }
-
-        return config;
-    }
-);
+attachAuthInterceptors(productApiClient);
 
 export default productApiClient;

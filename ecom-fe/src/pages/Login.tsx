@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { login } from "../services/authApi";
+import { setAuthTokens } from "../utils/token";
 
 import {
     useNavigate,
@@ -26,10 +27,15 @@ export default function Login() {
                 password
             });
 
-            localStorage.setItem(
-                "token",
-                res.data.accessToken
-            );
+            const accessToken = res.data?.accessToken;
+            const refreshToken = res.data?.refreshToken;
+
+            if (!accessToken) {
+                alert("Login failed");
+                return;
+            }
+
+            setAuthTokens(accessToken, refreshToken);
 
             navigate("/");
 

@@ -33,6 +33,9 @@ namespace InventoryService.Api.Controllers
             var result = await _mediator.Send(
                 new GetInventoryByProductIdQuery(productId));
 
+            if (result == null)
+                return NotFound();
+
             return Ok(result);
         }
         // 🔥 RESERVE STOCK

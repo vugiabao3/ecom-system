@@ -15,8 +15,8 @@ export const resetPassword = (data: any) =>
 export const changePassword = (data: any) =>
     api.post("/auth/change-password", data);
 
-export const logout = () =>
-    api.post("/auth/logout");
+export const logout = (data: { refreshToken: string }) =>
+    api.post("/auth/logout", data);
 
 export const refresh = (data: any) =>
     api.post("/auth/refresh", data);

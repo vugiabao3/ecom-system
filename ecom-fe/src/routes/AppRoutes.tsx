@@ -13,6 +13,9 @@ import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import ChangePassword from "../pages/ChangePassword";
 import Home from "../pages/Home";
+import Payment from "../pages/Payment";
+import PaymentSuccess from "../pages/PaymentSuccess";
+import PaymentFailed from "../pages/PaymentFailed";
 
 import ProtectedRoute
 from "../components/ProtectedRoute";
@@ -47,7 +50,11 @@ export default function AppRoutes() {
 
                 <Route
                     path="/change-password"
-                    element={<ChangePassword />}
+                    element={
+                        <ProtectedRoute>
+                            <ChangePassword />
+                        </ProtectedRoute>
+                    }
                 />
 
                 <Route
@@ -59,25 +66,55 @@ export default function AppRoutes() {
                     }
                 />
                 <Route
-    path="/checkout"
-    element={<Checkout />}
-/>
+                    path="/checkout"
+                    element={
+                        <ProtectedRoute>
+                            <Checkout />
+                        </ProtectedRoute>
+                    }
+                />
 
                 <Route
-    path="/products"
-    element={<ProductList />}
-/>
+                    path="/products"
+                    element={<ProductList />}
+                />
 
-
-
-<Route
-    path="/products/:id"
-    element={<ProductDetail />}
-/>
-<Route
-    path="/cart"
-    element={<Cart />}
-/>
+                <Route
+                    path="/products/:id"
+                    element={<ProductDetail />}
+                />
+                <Route
+                    path="/cart"
+                    element={
+                        <ProtectedRoute>
+                            <Cart />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/payment"
+                    element={
+                        <ProtectedRoute>
+                            <Payment />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/payment-success"
+                    element={
+                        <ProtectedRoute>
+                            <PaymentSuccess />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/payment-failed"
+                    element={
+                        <ProtectedRoute>
+                            <PaymentFailed />
+                        </ProtectedRoute>
+                    }
+                />
             </Routes>
 
         </BrowserRouter>

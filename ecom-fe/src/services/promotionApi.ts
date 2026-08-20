@@ -2,10 +2,15 @@ import promotionApiClient
 from "./promotionApiClient";
 
 export const applyCoupon = (
-    code: string
+    couponCode: string,
+    totalAmount: number
 ) => {
 
-    return promotionApiClient.get(
-        `/promotions/apply?code=${code}`
+    return promotionApiClient.post(
+        "/api/Promotion/apply",
+        {
+            couponCode,
+            totalAmount
+        }
     );
 };

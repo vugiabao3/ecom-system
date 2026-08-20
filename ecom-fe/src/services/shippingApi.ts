@@ -18,6 +18,6 @@ export const getShippingStatus = (
 ) => {
 
     return shippingApiClient.get(
-        `/api/shipping/${orderId}`
+        `/api/Shipping/by-order/${orderId}`
     );
 };

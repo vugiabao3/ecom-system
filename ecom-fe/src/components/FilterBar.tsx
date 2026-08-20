@@ -16,7 +16,7 @@ export default function FilterBar({
                     Sort Product
                 </option>
 
-                <option value="price_asc">
+                <option value="price">
                     Price Low → High
                 </option>
 
