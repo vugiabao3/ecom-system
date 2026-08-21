@@ -1,23 +1,21 @@
-import shippingApiClient
-from "./shippingApiClient";
+import shippingApiClient from "./shippingApiClient";
 
-export const calculateShippingFee = (
-    address: string
-) => {
+export interface ShipmentDto {
+    id: string;
+    orderId: string;
+    status: string;
+    createdAt?: string;
+    updatedAt?: string;
+}
 
-    return shippingApiClient.post(
-        "/api/shipping/calculate",
-        {
-            address
-        }
-    );
+export const getShippingStatusByOrderId = (orderId: string) => {
+    return shippingApiClient.get<ShipmentDto>(`/api/Shipping/by-order/${orderId}`);
 };
 
-export const getShippingStatus = (
-    orderId: string
-) => {
+export const startDelivery = (shipmentId: string) => {
+    return shippingApiClient.post(`/api/Shipping/${shipmentId}/start-delivery`);
+};
 
-    return shippingApiClient.get(
-        `/api/Shipping/by-order/${orderId}`
-    );
+export const completeShipping = (shipmentId: string) => {
+    return shippingApiClient.post(`/api/Shipping/${shipmentId}/complete`);
 };

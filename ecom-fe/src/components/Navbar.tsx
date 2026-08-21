@@ -1,53 +1,69 @@
-import {
-    useNavigate,
-    Link
-} from "react-router-dom";
-import CartIcon
-from "./CartIcon";
-import { logout } from "../services/authApi";
-import { clearAuth, getRefreshToken } from "../utils/token";
-export default function Navbar() {
+import { useNavigate, Link } from "react-router-dom";
+import CartIcon from "./CartIcon";
+import { useAuth } from "../context/AuthContext";
+import "../styles/navbar.css";
 
+export default function Navbar() {
     const navigate = useNavigate();
+    const { user, isAuthenticated, isAdmin, logout } = useAuth();
 
     const handleLogout = async () => {
-        const refreshToken = getRefreshToken();
-
-        try {
-            if (refreshToken) {
-                await logout({ refreshToken });
-            }
-        } catch {
-            // still clear local session
-        }
-
-        clearAuth();
+        await logout();
         navigate("/login");
     };
 
     return (
+        <header className="navbar-container">
+            <Link to="/" className="navbar-brand">
+                🛍️ <span>EcomSystem</span>
+            </Link>
 
-        <div className="navbar">
-
-            <h2>EcomSystem</h2>
-
-            <div className="nav-links">
-
-                <Link to="/">
-                    Home
+            <nav className="navbar-links">
+                <Link to="/" className="navbar-link">
+                    Products
                 </Link>
 
-                <Link to="/change-password">
-                    Change Password
-                </Link>
+                {isAuthenticated ? (
+                    <>
+                        <Link to="/profile" className="navbar-link">
+                            👤 Profile
+                        </Link>
 
-                <button onClick={handleLogout}>
-                    Logout
-                </button>
-                <CartIcon />
+                        <Link to="/orders" className="navbar-link">
+                            📦 Orders
+                        </Link>
 
-            </div>
+                        {isAdmin && (
+                            <Link to="/admin" className="navbar-admin-badge">
+                                ⚙️ Admin Portal
+                            </Link>
+                        )}
 
-        </div>
+                        <CartIcon />
+
+                        <div className="navbar-user-section">
+                            <span className="navbar-user-email">
+                                {user?.email}
+                            </span>
+                            <button
+                                onClick={handleLogout}
+                                className="navbar-btn outline"
+                            >
+                                Logout
+                            </button>
+                        </div>
+                    </>
+                ) : (
+                    <div className="navbar-user-section">
+                        <Link to="/login" className="navbar-btn outline">
+                            Login
+                        </Link>
+                        <Link to="/register" className="navbar-btn primary">
+                            Register
+                        </Link>
+                    </div>
+                )}
+            </nav>
+        </header>
     );
 }

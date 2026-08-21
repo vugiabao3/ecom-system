@@ -2,7 +2,7 @@ import axios from "axios";
 import { attachAuthInterceptors } from "./httpInterceptors";
 
 const paymentApiClient = axios.create({
-    baseURL: "http://localhost:5289",
+    baseURL: import.meta.env.VITE_PAYMENT_API_URL || "http://localhost:5289",
 });
 
 attachAuthInterceptors(paymentApiClient);

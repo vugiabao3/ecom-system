@@ -2,7 +2,7 @@ import axios from "axios";
 import { attachAuthInterceptors } from "./httpInterceptors";
 
 const cartApiClient = axios.create({
-    baseURL: "http://localhost:5002",
+    baseURL: import.meta.env.VITE_CART_API_URL || "http://localhost:5002",
 });
 
 attachAuthInterceptors(cartApiClient);

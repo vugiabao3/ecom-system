@@ -109,3 +109,18 @@
 
     cursor: pointer;
 }
+
+/* Responsive */
+@media (max-width: 480px) {
+    .auth-container {
+        width: 90%;
+        margin: 40px auto;
+        padding: 16px;
+    }
+
+    .auth-links {
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
+    }
+}

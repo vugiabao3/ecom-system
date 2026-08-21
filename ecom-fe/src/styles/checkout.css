@@ -98,3 +98,18 @@
     background: gray;
     cursor: not-allowed;
 }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .checkout-page {
+        padding: 12px;
+    }
+
+    .checkout-title {
+        font-size: 24px;
+    }
+
+    .checkout-card {
+        padding: 16px;
+    }
+}

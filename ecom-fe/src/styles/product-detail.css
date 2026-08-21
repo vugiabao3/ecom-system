@@ -188,3 +188,33 @@
 
     font-size: 16px;
 }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .product-detail-page {
+        flex-direction: column;
+        gap: 24px;
+        padding: 20px;
+    }
+
+    .detail-left,
+    .detail-right {
+        width: 100%;
+        flex: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-detail-page {
+        padding: 12px;
+    }
+
+    .product-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .product-actions button {
+        width: 100%;
+    }
+}

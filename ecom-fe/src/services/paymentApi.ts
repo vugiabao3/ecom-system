@@ -1,11 +1,15 @@
 import api from "./paymentApiClient";
 
-export const createPayment = (
-    data: any
-) => {
+export interface CreatePaymentRequest {
+    orderId: string;
+    paymentMethod: string;
+}
 
-    return api.post(
-        "/api/Payments",
-        data
-    );
+export interface CreatePaymentResponse {
+    paymentId: string;
+    status: string;
+}
+
+export const createPayment = (data: CreatePaymentRequest) => {
+    return api.post<CreatePaymentResponse>("/api/Payments", data);
 };
