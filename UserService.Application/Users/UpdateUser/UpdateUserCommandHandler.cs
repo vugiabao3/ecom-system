@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using UserService.Application.Interfaces;
 using UserService.Domain.Constants;
 using UserService.Domain.Entities;
+using EcomSystem.Contracts.Enums;
 
 namespace UserService.Application.Users.UpdateUser
 {
@@ -29,10 +30,12 @@ namespace UserService.Application.Users.UpdateUser
             if (user == null)
                 throw new Exception("User not found");
 
-            // 🔥 update fields
+            // 🔥 update fields (Role is intentionally NOT modified to preserve it)
             user.FullName = request.FullName;
             user.Phone = request.Phone;
             user.Avatar = request.Avatar;
+            user.CurrentAddress = request.CurrentAddress;
+            user.CurrentLocation = request.CurrentLocation;
 
             await _repo.UpdateAsync(user);
             await _repo.AddActivityLogAsync(new UserActivityLog
@@ -46,7 +49,8 @@ namespace UserService.Application.Users.UpdateUser
                 Id = user.Id,
                 FullName = user.FullName,
                 Phone = user.Phone,
-                Avatar = user.Avatar
+                Avatar = user.Avatar,
+                Role = user.Role
             };
         }
     }

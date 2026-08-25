@@ -11,6 +11,8 @@ namespace PromotionService.Application.Promotions.Commands.ApplyPromotion
     {
         public string CouponCode { get; set; } = default!;
         public decimal TotalAmount { get; set; }
+        public Guid? SellerId { get; set; }
+        public Guid? BrandId { get; set; }
+        public List<Guid>? SellerIds { get; set; }
     }
-
 }

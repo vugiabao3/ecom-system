@@ -63,9 +63,8 @@ namespace PaymentService.Infrastructure.Messaging
 
                     await mediator.Send(new ProcessPaymentCommand
                     {
-                        OrderId = @event.OrderId
-                        //Amount = @event.TotalAmount,
-                        //Items = @event.Items
+                        OrderId = @event.OrderId,
+                        PaymentMethod = @event.PaymentMethod
                     });
                     channel.BasicAck(ea.DeliveryTag, false);
                 }

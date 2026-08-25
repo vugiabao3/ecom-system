@@ -37,15 +37,40 @@ namespace PaymentService.Infrastructure.Services
             var response = await _http.SendAsync(request);
 
             if (!response.IsSuccessStatusCode)
-{
-    var error = await response.Content.ReadAsStringAsync();
+            {
+                var error = await response.Content.ReadAsStringAsync();
 
-    throw new Exception(
-        $"OrderService failed: {(int)response.StatusCode} - {error}"
-    );
-}
+                throw new Exception(
+                    $"OrderService failed: {(int)response.StatusCode} - {error}"
+                );
+            }
 
             return await response.Content.ReadFromJsonAsync<OrderDto>();
+        }
+
+        public async Task UpdateOrderPaymentStatus(Guid orderId, string paymentStatus)
+        {
+            var jwt = _token.Generate();
+
+            var request = new HttpRequestMessage(
+                HttpMethod.Put,
+                $"http://orderservice:8080/api/orders/{orderId}/payment-status"
+            );
+
+            request.Headers.Authorization =
+                new AuthenticationHeaderValue("Bearer", jwt);
+
+            request.Content = JsonContent.Create(new { paymentStatus });
+
+            var response = await _http.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception(
+                    $"OrderService failed: {(int)response.StatusCode} - {error}"
+                );
+            }
         }
     }
 }

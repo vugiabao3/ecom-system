@@ -14,47 +14,40 @@ namespace CartService.Application.Cart.Commands.AddToCart
         private readonly IProductServiceClient _productClient;
         private readonly ICurrentUserService _currentUser;
         private readonly IInventoryServiceClient _inventoryClient;
-        public AddToCartHandler(
+    public AddToCartHandler(
             ICartRepository cartRepo,
             IProductServiceClient productClient,
             ICurrentUserService currentUser,
             IInventoryServiceClient inventoryClient)
-        {
-            _cartRepo = cartRepo;
-            _productClient = productClient;
-            _currentUser = currentUser;
-            _inventoryClient = inventoryClient;
-        }
+    {
+        _cartRepo = cartRepo;
+        _productClient = productClient;
+        _currentUser = currentUser;
+        _inventoryClient = inventoryClient;
+    }
 
-        public async Task<AddToCartResponse> Handle(AddToCartCommand request, CancellationToken cancellationToken)
-        {
-            // 🔥 1. lấy userId từ JWT
-            var userId = _currentUser.UserId;
+    public async Task<AddToCartResponse> Handle(AddToCartCommand request, CancellationToken cancellationToken)
+    {
+        var userId = _currentUser.UserId;
 
-            if (string.IsNullOrEmpty(userId))
-                throw new Exception("Unauthorized");
+        if (string.IsNullOrEmpty(userId))
+            throw new Exception("Unauthorized");
 
-            // 🔥 2. call ProductService
-            var product = await _productClient.GetProductById(request.ProductId);
+        var product = await _productClient.GetProductById(request.ProductId);
 
-            if (product == null)
-                throw new Exception("Product not found");
+        if (product == null)
+            throw new Exception("Product not found");
 
-            // 🔥 3. tạo cart item
-            var cartItem = new CartItem
+        var cartItem = new CartItem
             {
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 ProductId = product.Id,
-                ProductName = product.Name, // 🔥 THÊM DÒNG NÀY
+                ProductName = product.Name,
                 Quantity = request.Quantity,
                 PriceSnapshot = product.Price
             };
-            await _inventoryClient.ReserveStockAsync(
-    request.ProductId,
-    request.Quantity
-);
-            // 🔥 4. save DB
+
             await _cartRepo.AddAsync(cartItem);
 
             return new AddToCartResponse

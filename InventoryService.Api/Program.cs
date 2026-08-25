@@ -1,7 +1,6 @@
-
-
 using InventoryService.Application.Interfaces;
 using InventoryService.Application.Inventory.Commands.AddStock;
+using InventoryService.Application.Inventory.Commands.StockAdjustment;
 using InventoryService.Application.Inventory.EventHandlers;
 using InventoryService.Infrastructure.Messaging;
 using InventoryService.Infrastructure.Persistence;
@@ -29,8 +28,12 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 builder.Services.AddScoped<PaymentSucceededEventHandler>();
+builder.Services.AddScoped<PaymentFailedEventHandler>();
+builder.Services.AddScoped<OrderCreatedEventHandler>();
+builder.Services.AddScoped<OrderCancelledEventHandler>();
+builder.Services.AddScoped<OrderReturnedEventHandler>();
+builder.Services.AddScoped<DeliveryFailedEventHandler>();
 
-builder.Services.AddSingleton<PaymentSucceededConsumer>();
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -84,20 +87,23 @@ builder.Services.AddCors(options =>
 });
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(AddStockHandler).Assembly));
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(typeof(StockAdjustmentHandler).Assembly));
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 
 
-builder.Services.AddScoped<PaymentFailedEventHandler>();
-
+builder.Services.AddSingleton<PaymentSucceededConsumer>();
 builder.Services.AddSingleton<PaymentFailedConsumer>();
-builder.Services.AddScoped<OrderCreatedEventHandler>();
+builder.Services.AddSingleton<OrderCreatedConsumer>();
+builder.Services.AddSingleton<OrderCancelledConsumer>();
+builder.Services.AddSingleton<OrderReturnedConsumer>();
+builder.Services.AddSingleton<DeliveryFailedConsumer>();
 
 builder.Services.AddSingleton<IEventBus, RabbitMqEventBus>();
 
-builder.Services.AddSingleton<OrderCreatedConsumer>();
 var app = builder.Build();
 // 🔥 start consumer
 var consumer = app.Services.GetRequiredService<OrderCreatedConsumer>();
@@ -106,6 +112,12 @@ var consumer2 = app.Services.GetRequiredService<PaymentSucceededConsumer>();
 consumer2.Start();
 var consumer3 = app.Services.GetRequiredService<PaymentFailedConsumer>();
 consumer3.Start();
+var consumer4 = app.Services.GetRequiredService<OrderCancelledConsumer>();
+consumer4.Start();
+var consumer5 = app.Services.GetRequiredService<OrderReturnedConsumer>();
+consumer5.Start();
+var consumer6 = app.Services.GetRequiredService<DeliveryFailedConsumer>();
+consumer6.Start();
 // Configure the HTTP request pipeline.
 
 app.UseSwagger();

@@ -1,8 +1,9 @@
-﻿ using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EcomSystem.Contracts.Enums;
 
 namespace AuthService.Domain.Entities
 {
@@ -14,11 +15,8 @@ namespace AuthService.Domain.Entities
 
         public string PasswordHash { get; set; }
 
-        public string Role { get; set; } = null!;
+        public UserRole Role { get; set; }
 
-        public string Status { get; set; }   // Active / Blocked
-
-
-
+        public string Status { get; set; }
     }
 }

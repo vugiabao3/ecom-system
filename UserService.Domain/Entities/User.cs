@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EcomSystem.Contracts.Enums;
 
 namespace UserService.Domain.Entities
 {
@@ -17,6 +18,7 @@ namespace UserService.Domain.Entities
 
         public string? Avatar { get; set; }
 
+        public UserRole Role { get; set; } = UserRole.User;
 
         public bool IsBlocked { get; set; }
 
@@ -24,5 +26,7 @@ namespace UserService.Domain.Entities
         public bool IsDeleted { get; set; }
         public ICollection<UserAddress> Addresses { get; set; }
 
+        public string? CurrentAddress { get; set; }
+        public string? CurrentLocation { get; set; }
     }
 }

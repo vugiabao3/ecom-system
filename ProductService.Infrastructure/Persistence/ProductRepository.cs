@@ -23,6 +23,8 @@ namespace ProductService.Infrastructure.Persistence
         public async Task<(List<Product>, int)> GetAllAsync(int page, int size, int? category, string? sort)
         {
             var query = _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Brand)
                 .Where(p => !p.IsDeleted)
                 .AsQueryable();
 
@@ -50,6 +52,7 @@ namespace ProductService.Infrastructure.Persistence
         {
             return await _context.Products
                 .Include(p => p.Category)
+                .Include(p => p.Brand)
                 .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted);
         }
         public async Task AddAsync(Product product)

@@ -1,13 +1,13 @@
-﻿using System;
+﻿using MediatR;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using MediatR;
 using ShippingService.Application.Interfaces;
 using ShippingService.Domain.Entities;
 using ShippingService.Application.Events;
+using EcomSystem.Contracts.Enums;
 
 namespace ShippingService.Application.Shipments.Commands.CreateShipment
 {
@@ -24,42 +24,45 @@ namespace ShippingService.Application.Shipments.Commands.CreateShipment
 
         public async Task<CreateShipmentResponse> Handle(CreateShipmentCommand request, CancellationToken cancellationToken)
         {
-            Console.WriteLine("🔥 CreateShipmentHandler CALLED");
+            var existing = await _repo.GetByOrderIdAsync(request.OrderId);
+            if (existing != null)
+            {
+                return new CreateShipmentResponse
+                {
+                    ShipmentId = existing.Id,
+                    Status = existing.Status.ToString()
+                };
+            }
 
             var shipment = new Shipment
             {
                 Id = Guid.NewGuid(),
                 OrderId = request.OrderId,
+                ShipperId = request.ShipperId,
                 Address = request.Address,
-                Phone = request.Phone,              // ✅ FIX
-                ReceiverName = request.ReceiverName, // ✅ FIX
-                Status = "CREATED",
-                TrackingCode = GenerateTrackingCode(), // 🔥 FIX QUAN TRỌNG
+                Phone = request.Phone,
+                ReceiverName = request.ReceiverName,
+                Status = ShipmentStatus.Created,
+                TrackingCode = GenerateTrackingCode(),
                 CreatedAt = DateTime.UtcNow
             };
-            Console.WriteLine($"🧾 Creating shipment for OrderId: {request.OrderId}");
 
             await _repo.AddAsync(shipment);
             await _repo.SaveChangesAsync();
-            Console.WriteLine("💾 Saved to DATABASE");
 
-            // 🔥 publish event
             await _eventBus.PublishAsync(new ShippingCreatedEvent
             {
                 OrderId = request.OrderId,
                 ShipmentId = shipment.Id
             });
-            Console.WriteLine("📡 ShippingCreatedEvent published");
-
 
             return new CreateShipmentResponse
             {
                 ShipmentId = shipment.Id,
-                Status = shipment.Status
+                Status = shipment.Status.ToString()
             };
-
         }
-        // 🔥 ADD METHOD NÀY
+
         private string GenerateTrackingCode()
         {
             return $"TRK-{Guid.NewGuid().ToString("N")[..10].ToUpper()}";

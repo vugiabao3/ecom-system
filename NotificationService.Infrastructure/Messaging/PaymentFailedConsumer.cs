@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NotificationService.Infrastructure.Persistence;
 using NotificationService.Domain.Entities;
 using NotificationService.Infrastructure.Services;
+using NotificationService.Domain.Interfaces;
 
 namespace NotificationService.Infrastructure.Messaging
 {
@@ -45,7 +46,7 @@ namespace NotificationService.Infrastructure.Messaging
                 autoDelete: false
             );
 
-            Console.WriteLine("🔥 PaymentFailedConsumer started...");
+            Console.WriteLine("?? PaymentFailedConsumer started...");
 
             var consumer = new EventingBasicConsumer(channel);
 
@@ -54,20 +55,17 @@ namespace NotificationService.Infrastructure.Messaging
                 var body = ea.Body.ToArray();
                 var json = Encoding.UTF8.GetString(body);
 
-                Console.WriteLine($"🔥 PAYMENT FAILED EVENT: {json}");
+                Console.WriteLine($"?? PAYMENT FAILED EVENT: {json}");
 
                 var evt = JsonSerializer.Deserialize<PaymentFailedEvent>(json);
 
                 if (evt == null) return;
 
+                // ?? G?i notification cho kh�ch h�ng
                 await _notificationService.SendPaymentFailed(evt.OrderId);
 
-
-
-
-                // 💾 2. TẠO SCOPE ĐỂ LẤY DB
                 using var scope = _scopeFactory.CreateScope();
-                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var repo = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
 
                 var notification = new Notification
                 {
@@ -78,8 +76,8 @@ namespace NotificationService.Infrastructure.Messaging
                     CreatedAt = DateTime.UtcNow
                 };
 
-                db.Notifications.Add(notification);
-                await db.SaveChangesAsync();
+                await repo.AddAsync(notification);
+                await repo.SaveChangesAsync();
             };
 
                 channel.BasicConsume(

@@ -1,11 +1,13 @@
-﻿using System;
+﻿using MediatR;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MediatR;
 using ShippingService.Application.Interfaces;
-
+using ShippingService.Domain.Entities;
+using ShippingService.Application.Events;
+using EcomSystem.Contracts.Enums;
 
 namespace ShippingService.Application.Shipments.Commands.UpdateShipmentStatus
 {
@@ -13,62 +15,91 @@ namespace ShippingService.Application.Shipments.Commands.UpdateShipmentStatus
         : IRequestHandler<UpdateShipmentStatusCommand, bool>
     {
         private readonly IShipmentRepository _repo;
+        private readonly IEventBus _eventBus;
+        private readonly IOrderServiceClient _orderClient;
 
-        public UpdateShipmentStatusHandler(IShipmentRepository repo)
+        public UpdateShipmentStatusHandler(IShipmentRepository repo, IEventBus eventBus, IOrderServiceClient orderClient)
         {
             _repo = repo;
+            _eventBus = eventBus;
+            _orderClient = orderClient;
         }
 
         public async Task<bool> Handle(UpdateShipmentStatusCommand request, CancellationToken cancellationToken)
         {
-            Console.WriteLine("🔥 UpdateShipmentStatusHandler CALLED");
-
             var shipment = await _repo.GetByIdAsync(request.ShipmentId);
 
             if (shipment == null)
-            {
-                Console.WriteLine("❌ Shipment NOT FOUND");
                 return false;
-            }
 
-            Console.WriteLine($"👉 Current Status: {shipment.Status}");
-            Console.WriteLine($"👉 Request Status: {request.Status}");
+            if (request.Status == ShipmentStatus.Failed && string.IsNullOrWhiteSpace(request.FailureReason))
+                throw new Exception("Failure reason is required for failed status");
 
-            // 🔥 RULE 1: CREATED → DELIVERING
-            if (request.Status == "DELIVERING")
-            {
-                if (shipment.Status != "CREATED")
-                {
-                    Console.WriteLine("❌ INVALID: phải từ CREATED → DELIVERING");
-                    return false;
-                }
-            }
+            var previousStatus = shipment.Status;
 
-            // 🔥 RULE 2: DELIVERING → DELIVERED
-            else if (request.Status == "DELIVERED")
-            {
-                if (shipment.Status != "DELIVERING")
-                {
-                    Console.WriteLine("❌ INVALID: phải từ DELIVERING → DELIVERED");
-                    return false;
-                }
-            }
+            if (!IsValidTransition(previousStatus, request.Status))
+                throw new Exception($"Invalid status transition from {previousStatus} to {request.Status}");
 
-            // ❌ STATUS KHÔNG HỢP LỆ
-            else
-            {
-                Console.WriteLine("❌ STATUS KHÔNG HỢP LỆ");
-                return false;
-            }
-
-            // 🔥 UPDATE
             shipment.Status = request.Status;
+            shipment.UpdatedAt = DateTime.UtcNow;
 
+            if (request.Status == ShipmentStatus.Failed)
+            {
+                shipment.FailureReason = request.FailureReason;
+            }
+
+            if (request.Status == ShipmentStatus.Delivered)
+            {
+                shipment.DeliveredAt = DateTime.UtcNow;
+            }
+
+            _repo.Update(shipment);
             await _repo.SaveChangesAsync();
 
-            Console.WriteLine($"✅ Updated status → {shipment.Status}");
+            if (request.Status == ShipmentStatus.Delivered)
+            {
+                var order = await _orderClient.GetOrder(shipment.OrderId);
+                await _eventBus.PublishAsync(new DeliverySucceededEvent
+                {
+                    OrderId = shipment.OrderId,
+                    ShipmentId = shipment.Id,
+                    PaymentMethod = order?.PaymentMethod ?? "QR"
+                });
+            }
+
+            if (request.Status == ShipmentStatus.Failed)
+            {
+                var order = await _orderClient.GetOrder(shipment.OrderId);
+                await _eventBus.PublishAsync(new DeliveryFailedEvent
+                {
+                    OrderId = shipment.OrderId,
+                    ShipmentId = shipment.Id,
+                    Reason = request.FailureReason
+                });
+                await _eventBus.PublishAsync(new ReturnOrderEvent
+                {
+                    OrderId = shipment.OrderId,
+                    ShipmentId = shipment.Id,
+                    Reason = request.FailureReason,
+                    Items = order?.Items ?? new List<ShippingService.Application.DTOs.OrderItemDto>()
+                });
+            }
 
             return true;
+        }
+
+        private bool IsValidTransition(ShipmentStatus from, ShipmentStatus to)
+        {
+            return (from, to) switch
+            {
+                (ShipmentStatus.Created, ShipmentStatus.Assigned) => true,
+                (ShipmentStatus.Assigned, ShipmentStatus.PickedUp) => true,
+                (ShipmentStatus.PickedUp, ShipmentStatus.Delivering) => true,
+                (ShipmentStatus.Delivering, ShipmentStatus.Delivered) => true,
+                (ShipmentStatus.Delivering, ShipmentStatus.Failed) => true,
+                (ShipmentStatus.Failed, ShipmentStatus.Returned) => true,
+                _ => false
+            };
         }
     }
 }

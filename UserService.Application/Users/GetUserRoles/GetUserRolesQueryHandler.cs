@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using UserService.Application.Interfaces;
 using UserService.Domain.Constants;
 using UserService.Domain.Entities;
+using EcomSystem.Contracts.Enums;
 
 namespace UserService.Application.Users.GetUserRoles
 {
@@ -37,6 +38,7 @@ namespace UserService.Application.Users.GetUserRoles
             return new GetUserRolesResponse
             {
                 UserId = user.Id,
+                Role = user.Role
             };
         }
     }

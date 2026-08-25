@@ -1,10 +1,18 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getCart, removeCartItem, clearCart, addToCart } from "../services/cartApi";
+import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 
 export default function Cart() {
     const navigate = useNavigate();
+    const { isAdmin, isSeller, isShipper } = useAuth();
+
+    if (isAdmin || isSeller || isShipper) {
+        navigate("/");
+        return null;
+    }
+
     const [cart, setCart] = useState<any>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [actionLoading, setActionLoading] = useState<boolean>(false);

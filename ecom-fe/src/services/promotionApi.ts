@@ -8,6 +8,8 @@ export interface PromotionDto {
     startDate: string;
     endDate: string;
     quantity: number;
+    sellerId?: string;
+    brandId?: string;
 }
 
 export interface CreatePromotionRequest {
@@ -30,6 +32,10 @@ export interface UpdatePromotionRequest {
 
 export const getAllPromotions = () => {
     return promotionApiClient.get<PromotionDto[]>("/api/Promotion/all");
+};
+
+export const getPromotionsBySeller = (sellerId: string) => {
+    return promotionApiClient.get<PromotionDto[]>(`/api/Promotion/seller/${sellerId}`);
 };
 
 export const createPromotion = (data: CreatePromotionRequest) => {

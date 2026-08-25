@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using EcomSystem.Contracts.Enums;
+
 namespace UserService.Application.Users.AssignRole
 {
     public class AssignRoleResponse
     {
         public Guid UserId { get; set; }
-        public string Role { get; set; } = null!;
+        public UserRole Role { get; set; }
     }
 }

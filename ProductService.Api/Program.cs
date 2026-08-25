@@ -10,6 +10,9 @@ using Microsoft.OpenApi.Models;
 using ProductService.Application.Interfaces;
 using ProductService.Application.Products.Queries.GetAllProducts;
 using ProductService.Application.Products.Queries.GetProductDetail;
+using ProductService.Application.Products.Commands.CreateBrand;
+using ProductService.Application.Products.Commands.UpdateBrand;
+using ProductService.Application.Products.Commands.DeleteBrand;
 using ProductService.Infrastructure.Cache;
 using ProductService.Infrastructure.Messaging;
 using ProductService.Infrastructure.Persistence;
@@ -71,6 +74,19 @@ builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(typeof(GetAllProductsHandler).Assembly);
 });
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(CreateBrandHandler).Assembly);
+});
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(UpdateBrandHandler).Assembly);
+});
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(DeleteBrandHandler).Assembly);
+});
+builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 
 // cho phép fe gọi 
 

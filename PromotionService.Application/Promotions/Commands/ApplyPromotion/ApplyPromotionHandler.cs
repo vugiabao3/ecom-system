@@ -60,6 +60,42 @@ namespace PromotionService.Application.Promotions.Commands.ApplyPromotion
                 };
             }
 
+            // 🔥 validate promotion belongs to a seller whose products are in the cart
+            if (request.SellerIds != null && request.SellerIds.Any())
+            {
+                if (!request.SellerIds.Contains(coupon.SellerId))
+                {
+                    return new ApplyPromotionResponse
+                    {
+                        isValid = false,
+                        discountAmount = 0,
+                        finalAmount = request.TotalAmount,
+                        message = "Coupon not valid for the sellers in this cart"
+                    };
+                }
+            }
+            else if (request.SellerId.HasValue && coupon.SellerId != request.SellerId.Value)
+            {
+                return new ApplyPromotionResponse
+                {
+                    isValid = false,
+                    discountAmount = 0,
+                    finalAmount = request.TotalAmount,
+                    message = "Coupon not valid for this seller"
+                };
+            }
+
+            if (request.BrandId.HasValue && coupon.BrandId != request.BrandId)
+            {
+                return new ApplyPromotionResponse
+                {
+                    isValid = false,
+                    discountAmount = 0,
+                    finalAmount = request.TotalAmount,
+                    message = "Coupon not valid for this brand"
+                };
+            }
+
             // 🔥 tính discount
             var discount = request.TotalAmount * coupon.DiscountPercent / 100;
             var final = request.TotalAmount - discount;

@@ -17,5 +17,17 @@ namespace InventoryService.Infrastructure.Persistence
             : base(options)
         {
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<InventoryItem>(entity =>
+            {
+                entity.ToTable("InventoryItems");
+                entity.HasKey(x => x.Id);
+                entity.HasIndex(x => x.ProductId).IsUnique();
+            });
+        }
     }
 }

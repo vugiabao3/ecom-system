@@ -1,10 +1,10 @@
-
-
 using NotificationService.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 using NotificationService.Infrastructure.Messaging;
 using NotificationService.Infrastructure.Services;
+using NotificationService.Domain.Interfaces;
+using NotificationService.Infrastructure.Repositories;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,23 +39,40 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// register repository
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+
 // register service
 builder.Services.AddSingleton<NotificationServices>();
 
+// register event consumers
 builder.Services.AddSingleton<OrderCreatedConsumer>();
 builder.Services.AddSingleton<PaymentSucceededConsumer>();
 builder.Services.AddSingleton<PaymentFailedConsumer>();
+builder.Services.AddSingleton<ShippingCreatedConsumer>();
+builder.Services.AddSingleton<DeliveryFailedConsumer>();
+builder.Services.AddSingleton<DeliverySucceededConsumer>();
+builder.Services.AddSingleton<ReturnOrderConsumer>();
+
 var app = builder.Build();
 
 
-// start consumer
-var consumer = app.Services.GetRequiredService<OrderCreatedConsumer>();
-consumer.Start();
-var consumer1 = app.Services.GetRequiredService<PaymentSucceededConsumer>();
-consumer1.Start();
+// start consumers
+var orderConsumer = app.Services.GetRequiredService<OrderCreatedConsumer>();
+orderConsumer.Start();
+var paymentSucceededConsumer = app.Services.GetRequiredService<PaymentSucceededConsumer>();
+paymentSucceededConsumer.Start();
+var paymentFailedConsumer = app.Services.GetRequiredService<PaymentFailedConsumer>();
+paymentFailedConsumer.Start();
+var shippingConsumer = app.Services.GetRequiredService<ShippingCreatedConsumer>();
+shippingConsumer.Start();
+var deliveryFailedConsumer = app.Services.GetRequiredService<DeliveryFailedConsumer>();
+deliveryFailedConsumer.Start();
+var deliverySucceededConsumer = app.Services.GetRequiredService<DeliverySucceededConsumer>();
+deliverySucceededConsumer.Start();
+var returnOrderConsumer = app.Services.GetRequiredService<ReturnOrderConsumer>();
+returnOrderConsumer.Start();
 
-var failedConsumer = app.Services.GetRequiredService<PaymentFailedConsumer>();
-failedConsumer.Start();
 // Configure the HTTP request pipeline.
 
 app.UseSwagger();

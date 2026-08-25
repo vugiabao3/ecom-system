@@ -52,6 +52,8 @@ namespace ProductService.Application.Products.Commands.CreateProduct
                 Price = request.Price,
                 CategoryId = request.CategoryId,
                 ImageUrl = request.ImageUrl,
+                SellerId = Guid.Parse(userId),
+                BrandId = request.BrandId,
                 CreatedBy = userId,
                 CreatedAt = DateTime.UtcNow,
                 IsDeleted = false

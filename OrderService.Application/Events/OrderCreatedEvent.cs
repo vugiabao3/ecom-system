@@ -6,17 +6,14 @@ using System.Threading.Tasks;
 using OrderService.Application.DTOs;
 namespace OrderService.Application.Events
 {
-    namespace OrderService.Application.Events
+    public class OrderCreatedEvent
     {
-        public class OrderCreatedEvent
-        {
-            public Guid OrderId { get; set; }
-            public List<OrderItemDto> Items { get; set; }
-            public decimal TotalAmount { get; set; } // 🔥 thêm
-
-            public string UserId { get; set; } // 🔥 thêm
-        }
-
-      
+        public Guid OrderId { get; set; }
+        public string UserId { get; set; }
+        public decimal TotalAmount { get; set; }
+        public decimal SubTotal { get; set; }
+        public decimal ShippingFee { get; set; }
+        public string PaymentMethod { get; set; }
+        public List<OrderItemDto> Items { get; set; }
     }
 }

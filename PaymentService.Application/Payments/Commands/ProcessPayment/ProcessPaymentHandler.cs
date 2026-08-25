@@ -7,6 +7,7 @@ using MediatR;
 using PaymentService.Application.Interfaces;
 using PaymentService.Domain.Entities;
 using PaymentService.Application.Events;
+using EcomSystem.Contracts.Enums;
 
 namespace PaymentService.Application.Payments.Commands.ProcessPayment
 {
@@ -25,68 +26,63 @@ namespace PaymentService.Application.Payments.Commands.ProcessPayment
 
         public async Task<ProcessPaymentResponse> Handle(ProcessPaymentCommand request, CancellationToken cancellationToken)
         {
-            // 🔥 DEBUG
-            Console.WriteLine("====== PAYMENT DEBUG ======");
-            Console.WriteLine($"Request OrderId: {request.OrderId}");
-
-            // 🔥 1. CHECK ORDER TỒN TẠI
             var order = await _orderClient.GetOrderById(request.OrderId);
-
-            Console.WriteLine($"Response OrderId: {order?.Id}");
-            Console.WriteLine($"Order Status: {order?.Status}");
-            Console.WriteLine("===========================");
             if (order == null)
                 throw new Exception("Order not found");
 
-            // 🔥 2. CHECK ORDER STATUS
-            if (order.Status != "PENDING")
+            if (order.Status != "PENDING" && order.Status != OrderStatus.Pending.ToString())
                 throw new Exception("Order already processed");
 
-            // 🔥 3. CHECK AMOUNT
-            //if (order.TotalPrice != request.Amount)
-            //    throw new Exception("Invalid amount");
+            var existing = await _repo.GetByOrderIdAsync(request.OrderId);
+            if (existing != null)
+            {
+                if (existing.Status == PaymentStatus.Paid || existing.Status == PaymentStatus.Failed)
+                {
+                    return new ProcessPaymentResponse
+                    {
+                        PaymentId = existing.Id,
+                        Status = existing.Status.ToString()
+                    };
+                }
+            }
 
-            // 🔥 4. fake payment logic
-            var success = true;
+            var method = Enum.Parse<PaymentMethod>(request.PaymentMethod, true);
 
             var payment = new Payment
             {
-                Id = Guid.NewGuid(),
+                Id = existing != null ? existing.Id : Guid.NewGuid(),
                 OrderId = request.OrderId,
-                //Amount = request.Amount,
-                Status = success ? "SUCCESS" : "FAILED",
-                CreatedAt = DateTime.UtcNow
+                Amount = order.TotalPrice,
+                Status = method == PaymentMethod.COD ? PaymentStatus.Pending : PaymentStatus.Pending,
+                Method = method,
+                CreatedAt = existing != null ? existing.CreatedAt : DateTime.UtcNow
             };
 
-            await _repo.AddAsync(payment);
-            await _repo.SaveChangesAsync();
-
-            // 🔥 5. publish event
-            if (success)
+            if (existing != null)
             {
-                Console.WriteLine("🔥 PUBLISH PAYMENT SUCCESS EVENT");
-                await _eventBus.PublishAsync(new PaymentSucceededEvent
-                {
-                    //UserId = request.UserId,              // 🔥 THÊM CÁI NÀY
-                    OrderId = request.OrderId,
-                    PaymentId = payment.Id,
-                    //Items = request.Items
-                });
-                Console.WriteLine("✅ EVENT PUBLISHED");
-
+                existing.Status = payment.Status;
+                existing.Method = payment.Method;
+                existing.Amount = payment.Amount;
+                _repo.Update(existing);
             }
             else
             {
-                await _eventBus.PublishAsync(new PaymentFailedEvent
-                {
-                    OrderId = request.OrderId
-                });
+                await _repo.AddAsync(payment);
             }
+
+            await _repo.SaveChangesAsync();
+
+            await _eventBus.PublishAsync(new PaymentPendingEvent
+            {
+                OrderId = request.OrderId,
+                PaymentId = payment.Id,
+                PaymentMethod = payment.Method.ToString()
+            });
 
             return new ProcessPaymentResponse
             {
                 PaymentId = payment.Id,
-                Status = payment.Status
+                Status = payment.Status.ToString().ToUpper()
             };
         }
     }

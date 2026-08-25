@@ -25,10 +25,8 @@ namespace PaymentService.Infrastructure.Messaging
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
 
-            var queue = "PaymentSucceededEvent"; // 🔥 FIX cứng theo consumer
+            var queue = typeof(T).Name;
 
-
-            // ✔ FIX 1: durable = true
             channel.QueueDeclare(
                 queue: queue,
                 durable: true,
@@ -38,7 +36,6 @@ namespace PaymentService.Infrastructure.Messaging
             var json = JsonSerializer.Serialize(@event);
             var body = Encoding.UTF8.GetBytes(json);
 
-            // ✔ FIX 2: persistent message
             var properties = channel.CreateBasicProperties();
             properties.Persistent = true;
             Console.WriteLine($"🔥 PUBLISH TO QUEUE: {queue}");
@@ -48,7 +45,6 @@ namespace PaymentService.Infrastructure.Messaging
                 basicProperties: properties,
                 body: body
             );
-
 
             await Task.CompletedTask;
         }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { getOrderById, type OrderDto } from "../services/orderApi";
+import { getOrderById, cancelOrder, type OrderDto } from "../services/orderApi";
 import { getShippingStatusByOrderId, type ShipmentDto } from "../services/shippingApi";
 import Navbar from "../components/Navbar";
 import OrderStatusBadge from "../components/OrderStatusBadge";
@@ -11,6 +11,8 @@ export default function OrderDetails() {
     const [shipment, setShipment] = useState<ShipmentDto | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [actionLoading, setActionLoading] = useState(false);
+    const [actionMessage, setActionMessage] = useState<string | null>(null);
 
     useEffect(() => {
         if (!id) return;
@@ -20,7 +22,6 @@ export default function OrderDetails() {
         getOrderById(id)
             .then((res) => {
                 setOrder(res.data);
-                // Attempt to fetch shipment status if available
                 return getShippingStatusByOrderId(id)
                     .then((sRes) => setShipment(sRes.data))
                     .catch(() => setShipment(null));
@@ -33,6 +34,21 @@ export default function OrderDetails() {
                 setLoading(false);
             });
     }, [id]);
+
+    const handleCancel = async () => {
+        if (!id || !window.confirm("Are you sure you want to cancel this order?")) return;
+        setActionLoading(true);
+        setActionMessage(null);
+        try {
+            await cancelOrder(id);
+            setActionMessage("Order cancelled successfully.");
+            setOrder((prev) => prev ? { ...prev, status: "CANCELLED" } : prev);
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Failed to cancel order.");
+        } finally {
+            setActionLoading(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -69,10 +85,12 @@ export default function OrderDetails() {
         );
     }
 
+    const canCancel = order.status === "PENDING" || order.status === "CONFIRMED";
+
     return (
         <div>
             <Navbar />
-            <div style={{ maxWidth: "800px", margin: "30px auto", padding: "20px" }}>
+            <div style={{ maxWidth: "900px", margin: "30px auto", padding: "20px" }}>
                 <div
                     style={{
                         background: "white",
@@ -81,7 +99,7 @@ export default function OrderDetails() {
                         boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
                     }}
                 >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", borderBottom: "1px solid #eee", paddingBottom: "16px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", borderBottom: "1px solid #eee", paddingBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
                         <div>
                             <h1 style={{ fontSize: "22px", color: "#333", margin: "0 0 6px" }}>
                                 Order Details
@@ -89,7 +107,7 @@ export default function OrderDetails() {
                             <span style={{ fontSize: "14px", color: "#888" }}>ID: {order.id}</span>
                         </div>
                         <div>
-                            <OrderStatusBadge status={order.status || "PENDING"} />
+                            <OrderStatusBadge status={order.status} />
                         </div>
                     </div>
 
@@ -114,12 +132,27 @@ export default function OrderDetails() {
                                 💳 Payment Summary
                             </h3>
                             <p style={{ margin: "6px 0", fontSize: "14px" }}>
-                                <strong>Status:</strong> {order.status}
+                                <strong>Method:</strong> {order.paymentMethod || "N/A"}
+                            </p>
+                            <p style={{ margin: "6px 0", fontSize: "14px" }}>
+                                <strong>Payment Status:</strong>{" "}
+                                <span style={{
+                                    color: order.paymentStatus === "PAID" ? "#2b8a3e" : "#f59f00",
+                                    fontWeight: "600"
+                                }}>
+                                    {order.paymentStatus}
+                                </span>
+                            </p>
+                            <p style={{ margin: "6px 0", fontSize: "14px" }}>
+                                <strong>Subtotal:</strong> {order.subTotal.toLocaleString()} đ
+                            </p>
+                            <p style={{ margin: "6px 0", fontSize: "14px" }}>
+                                <strong>Shipping Fee:</strong> {order.shippingFee.toLocaleString()} đ
                             </p>
                             <p style={{ margin: "6px 0", fontSize: "14px" }}>
                                 <strong>Total:</strong>{" "}
                                 <span style={{ color: "#ee4d2d", fontSize: "18px", fontWeight: "bold" }}>
-                                    {order.totalPrice?.toLocaleString()} đ
+                                    {order.totalPrice.toLocaleString()} đ
                                 </span>
                             </p>
                         </div>
@@ -134,24 +167,83 @@ export default function OrderDetails() {
                                 <strong>Shipment ID:</strong> {shipment.id}
                             </p>
                             <p style={{ margin: "4px 0", fontSize: "14px" }}>
+                                <strong>Tracking Code:</strong> {shipment.id.substring(0, 12)}-E{shipment.id.substring(12, 16)}
+                            </p>
+                            <p style={{ margin: "4px 0", fontSize: "14px" }}>
                                 <strong>Status:</strong> {shipment.status}
                             </p>
+                            {shipment.shipperId && (
+                                <p style={{ margin: "4px 0", fontSize: "14px" }}>
+                                    <strong>Shipper ID:</strong> {shipment.shipperId}
+                                </p>
+                            )}
                         </div>
                     )}
 
-                    <div style={{ marginTop: "28px", textAlign: "right" }}>
+                    <div style={{ marginTop: "20px", background: "#fff9f0", padding: "16px", borderRadius: "8px", border: "1px solid #ffec99" }}>
+                        <h3 style={{ fontSize: "16px", color: "#e67700", marginBottom: "12px" }}>
+                            📋 Order Timeline
+                        </h3>
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
+                            <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#f59f00" }}></div>
+                            <span style={{ fontSize: "14px" }}>Order Created</span>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
+                            <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: order.status !== "PENDING" ? "#228be6" : "#ddd" }}></div>
+                            <span style={{ fontSize: "14px", color: order.status !== "PENDING" ? "#333" : "#999" }}>Order Confirmed</span>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
+                            <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: ["SHIPPING", "DELIVERED"].includes(order.status) ? "#228be6" : "#ddd" }}></div>
+                            <span style={{ fontSize: "14px", color: ["SHIPPING", "DELIVERED"].includes(order.status) ? "#333" : "#999" }}>Shipping</span>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                            <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: order.status === "DELIVERED" ? "#2b8a3e" : "#ddd" }}></div>
+                            <span style={{ fontSize: "14px", color: order.status === "DELIVERED" ? "#333" : "#999" }}>Delivered</span>
+                        </div>
+                    </div>
+
+                    {actionMessage && (
+                        <div style={{ marginTop: "16px", padding: "12px", background: "#e6fcf5", color: "#0ca678", borderRadius: "6px" }}>
+                            {actionMessage}
+                        </div>
+                    )}
+
+                    {error && (
+                        <div style={{ marginTop: "16px", padding: "12px", background: "#ffe3e3", color: "#e03131", borderRadius: "6px" }}>
+                            {error}
+                        </div>
+                    )}
+
+                    <div style={{ marginTop: "20px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                        {canCancel && (
+                            <button
+                                onClick={handleCancel}
+                                disabled={actionLoading}
+                                style={{
+                                    padding: "10px 20px",
+                                    background: "#e03131",
+                                    color: "white",
+                                    border: "none",
+                                    borderRadius: "6px",
+                                    cursor: actionLoading ? "not-allowed" : "pointer",
+                                    fontWeight: "600",
+                                }}
+                            >
+                                {actionLoading ? "Processing..." : "Cancel Order"}
+                            </button>
+                        )}
                         <Link
-                            to="/"
+                            to="/orders"
                             style={{
                                 padding: "10px 20px",
-                                background: "#ee4d2d",
-                                color: "white",
+                                background: "#f0f0f0",
+                                color: "#333",
                                 borderRadius: "6px",
                                 textDecoration: "none",
-                                fontWeight: "bold",
+                                fontWeight: "600",
                             }}
                         >
-                            Continue Shopping
+                            ← Back to Orders
                         </Link>
                     </div>
                 </div>

@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -6,7 +6,9 @@ using NotificationService.Domain.Events;
 using NotificationService.Infrastructure.Services;
 using NotificationService.Infrastructure.Persistence;
 using NotificationService.Domain.Entities;
+using NotificationService.Domain.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+
 namespace NotificationService.Infrastructure.Messaging;
 
 public class OrderCreatedConsumer
@@ -39,7 +41,7 @@ public class OrderCreatedConsumer
             autoDelete: false,
             arguments: null
         );
-        Console.WriteLine("🔥 OrderCreatedConsumer started...");
+        Console.WriteLine("?? OrderCreatedConsumer started...");
 
         var consumer = new EventingBasicConsumer(channel);
 
@@ -47,22 +49,21 @@ public class OrderCreatedConsumer
         {
             var body = ea.Body.ToArray();
             var json = Encoding.UTF8.GetString(body);
-            Console.WriteLine($"🔥 Received message: {json}");
+            Console.WriteLine($"?? Received message: {json}");
 
             var orderEvent = JsonSerializer.Deserialize<OrderCreatedEvent>(json);
             if (orderEvent == null)
             {
-                Console.WriteLine("❌ Deserialize failed");
+                Console.WriteLine("? Deserialize failed");
                 return;
             }
-            Console.WriteLine($"✅ OrderId: {orderEvent.OrderId}");
+            Console.WriteLine($"? OrderId: {orderEvent.OrderId}");
 
-            // 👉 Gửi notification
+            // ?? G?i notification cho kh�ch h�ng
             await _notificationService.SendOrderCreated(orderEvent.OrderId);
 
-            // 💾 2. TẠO SCOPE ĐỂ LẤY DB
             using var scope = _scopeFactory.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var repo = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
 
             var notification = new Notification
             {
@@ -73,8 +74,8 @@ public class OrderCreatedConsumer
                 CreatedAt = DateTime.UtcNow
             };
 
-            db.Notifications.Add(notification);
-            await db.SaveChangesAsync();
+            await repo.AddAsync(notification);
+            await repo.SaveChangesAsync();
         };
         channel.BasicConsume(
             queue: "OrderCreated",

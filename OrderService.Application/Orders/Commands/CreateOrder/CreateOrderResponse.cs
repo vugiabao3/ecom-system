@@ -11,6 +11,8 @@ namespace OrderService.Application.Orders.Commands.CreateOrder
         public Guid OrderId { get; set; }
         public decimal SubTotal { get; set; }
         public decimal Discount { get; set; }
+        public decimal ShippingFee { get; set; }
         public decimal TotalPrice { get; set; }
+        public string PaymentMethod { get; set; }
     }
 }

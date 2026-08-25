@@ -22,11 +22,9 @@ namespace OrderService.Infrastructure.Services
             _token = token;
         }
 
-        public async Task<ApplyPromotionResponse> Apply(string code, decimal total)
+        public async Task<ApplyPromotionResponse> Apply(string code, decimal total, Guid? sellerId, Guid? brandId)
         {
             var jwt = _token.Generate();
-            // 🔥 DEBUG Ở ĐÂY
-            Console.WriteLine("🔥 INTERNAL TOKEN: " + jwt);
 
             using var request = new HttpRequestMessage(
                 HttpMethod.Post,
@@ -40,7 +38,9 @@ namespace OrderService.Infrastructure.Services
                 JsonSerializer.Serialize(new
                 {
                     couponCode = code,
-                    totalAmount = total
+                    totalAmount = total,
+                    sellerId = sellerId,
+                    brandId = brandId
                 }),
                 Encoding.UTF8,
                 "application/json"

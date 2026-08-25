@@ -1,0 +1,119 @@
+.hero-banner {
+    background: linear-gradient(135deg, #ee4d2d 0%, #ff6b47 100%);
+    color: white;
+    padding: 60px 40px;
+    text-align: center;
+    border-radius: 16px;
+    margin-bottom: 40px;
+}
+
+.hero-banner h1 {
+    font-size: 36px;
+    margin-bottom: 12px;
+    font-weight: 800;
+}
+
+.hero-banner p {
+    font-size: 18px;
+    opacity: 0.95;
+    margin-bottom: 24px;
+}
+
+.hero-banner .hero-btn {
+    display: inline-block;
+    padding: 14px 32px;
+    background: white;
+    color: #ee4d2d;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+    transition: all 0.2s;
+}
+
+.hero-banner .hero-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-title a {
+    font-size: 14px;
+    color: #ee4d2d;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.section-title a:hover {
+    text-decoration: underline;
+}
+
+.section {
+    margin-bottom: 40px;
+}
+
+.discount-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: #ee4d2d;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.product-card-wrapper {
+    position: relative;
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+}
+
+.category-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px 16px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    text-decoration: none;
+    color: #333;
+    transition: all 0.2s;
+}
+
+.category-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.category-card .cat-icon {
+    font-size: 40px;
+    margin-bottom: 8px;
+}
+
+.category-card .cat-name {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .hero-banner {
+        padding: 40px 20px;
+    }
+    .hero-banner h1 {
+        font-size: 24px;
+    }
+}

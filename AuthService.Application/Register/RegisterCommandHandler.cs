@@ -1,4 +1,5 @@
 ﻿using AuthService.Application.Common.Exceptions;
+using EcomSystem.Contracts.Enums;
 using EcomSystem.Contracts.Users;
 using AuthService.Application.Interfaces;
 using MediatR;
@@ -63,7 +64,7 @@ namespace AuthService.Application.Register
                 Id = userId, // 🔥 quan trọng nhất
                 Email = request.Email,
                 PasswordHash = hashedPassword, // dùng hash đã tạo
-                Role = "User",
+                Role = UserRole.User,
                 Status = "Active",
             };
 

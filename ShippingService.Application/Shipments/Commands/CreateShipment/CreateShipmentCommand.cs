@@ -13,5 +13,6 @@ namespace ShippingService.Application.Shipments.Commands.CreateShipment
         public string Address { get; set; }
         public string ReceiverName { get; set; }
         public string Phone { get; set; }
+        public Guid? ShipperId { get; set; }
     }
 }

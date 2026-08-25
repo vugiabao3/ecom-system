@@ -11,7 +11,9 @@ namespace ShippingService.Application.Interfaces
     {
         Task AddAsync(Shipment shipment);
         Task<Shipment?> GetByIdAsync(Guid id);
+        Task<List<Shipment>> GetByShipperIdAsync(Guid? shipperId);
         Task SaveChangesAsync();
         Task<Shipment?> GetByOrderIdAsync(Guid orderId);
+        void Update(Shipment shipment);
     }
 }

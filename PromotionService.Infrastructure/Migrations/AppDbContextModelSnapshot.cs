@@ -20,6 +20,7 @@ namespace PromotionService.Infrastructure.Migrations
                 .HasAnnotation("ProductVersion", "8.0.26")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("PromotionService.Domain.Entities.Promotion", b =>
                 {
@@ -27,9 +28,12 @@ namespace PromotionService.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("BrandId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("DiscountPercent")
                         .HasColumnType("decimal(18,2)");
@@ -43,12 +47,20 @@ namespace PromotionService.Infrastructure.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<Guid>("SellerId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Promotions");
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("SellerId");
+
+                    b.ToTable("Promotions", (string)null);
                 });
 
             modelBuilder.Entity("PromotionService.Domain.Entities.UserPoint", b =>
@@ -65,11 +77,14 @@ namespace PromotionService.Infrastructure.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserPoints");
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("UserPoints", (string)null);
                 });
 #pragma warning restore 612, 618
         }

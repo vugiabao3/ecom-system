@@ -1,7 +1,7 @@
 ﻿using AuthService.Application.Interfaces;
+using EcomSystem.Contracts.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.NetworkInformation;
 
 namespace AuthService.Api.Controllers
 {
@@ -19,7 +19,7 @@ namespace AuthService.Api.Controllers
 
         [HttpPost("set-role")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> SetRole(Guid userId, string role)
+        public async Task<IActionResult> SetRole(Guid userId, UserRole role)
         {
             var user = await _repo.GetByIdAsync(userId);
             if (user == null) return NotFound("User not found");

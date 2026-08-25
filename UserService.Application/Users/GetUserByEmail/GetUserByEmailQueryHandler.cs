@@ -38,7 +38,8 @@ namespace UserService.Application.Users.GetUserByEmail
             {
                 Id = user.Id,
                 Email = user.Email,
-                FullName = user.FullName
+                FullName = user.FullName,
+                Role = user.Role.ToString()
             };
         }
     }

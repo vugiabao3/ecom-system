@@ -5,6 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OrderService.Application.Interfaces;
 using OrderService.Application.Orders.Commands.CreateOrder;
+using OrderService.Application.Orders.Commands.CancelOrder;
+using OrderService.Application.Orders.Commands.UpdateOrderStatus;
 using OrderService.Application.Orders.EventHandlers;
 using OrderService.Infrastructure.Messaging;
 using OrderService.Infrastructure.Persistence;
@@ -54,6 +56,9 @@ builder.Services.AddSwaggerGen(options =>
 });
 builder.Services.AddScoped<PaymentSucceededEventHandler>();
 builder.Services.AddScoped<PaymentFailedEventHandler>();
+builder.Services.AddScoped<CancelOrderHandler>();
+builder.Services.AddScoped<UpdateOrderStatusHandler>();
+builder.Services.AddScoped<ReturnOrderEventHandler>();
 
 builder.Services.AddSingleton<PaymentConsumer>();
 
@@ -155,7 +160,8 @@ builder.Services.AddAuthorization(options =>
 
     options.AddPolicy("UserOnly", policy =>
         policy.AddAuthenticationSchemes("User")
-              .RequireAuthenticatedUser());
+              .RequireAuthenticatedUser()
+              .RequireRole("User"));
 });
 builder.Services.AddAuthorization();
 

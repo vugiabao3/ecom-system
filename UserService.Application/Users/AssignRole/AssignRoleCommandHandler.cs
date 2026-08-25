@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using UserService.Application.Interfaces;
 using UserService.Domain.Constants;
 using UserService.Domain.Entities;
+using EcomSystem.Contracts.Enums;
 
 namespace UserService.Application.Users.AssignRole
 {
@@ -30,18 +31,20 @@ namespace UserService.Application.Users.AssignRole
                 throw new Exception("User not found");
 
             // 🔥 change role
+            user.Role = request.Role;
 
             await _repo.UpdateAsync(user);
             await _repo.AddActivityLogAsync(new UserActivityLog
             {
                 UserId = request.UserId,
                 Action = ActivityActions.Assign,
-                Description = "User was  assign"
+                Description = $"User role changed to {request.Role}"
             });
 
             return new AssignRoleResponse
             {
                 UserId = user.Id,
+                Role = user.Role
             };
         }
     }

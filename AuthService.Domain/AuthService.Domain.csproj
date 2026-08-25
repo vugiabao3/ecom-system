@@ -10,4 +10,8 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.6" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Contracts\EcomSystem.Contracts.csproj" />
+  </ItemGroup>
+
 </Project>

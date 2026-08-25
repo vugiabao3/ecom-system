@@ -50,7 +50,7 @@ namespace AuthService.Application.Login
             {
                 UserId = authUser.Id,
                 Email = authUser.Email,
-                Role = authUser.Role
+                Role = authUser.Role.ToString()
             };
 
             // 4. Generate tokens

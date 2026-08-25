@@ -9,6 +9,10 @@ export interface ProductItem {
     imageUrl?: string;
     rating?: number;
     description?: string;
+    sellerId?: string;
+    brandId?: string;
+    brandName?: string;
+    isDeleted?: boolean;
 }
 
 export interface GetProductsParams {
@@ -55,6 +59,12 @@ export const getProductById = (id: string) =>
 export const getProductsByIds = (ids: string[]) =>
     api.post("/api/Products/batch", ids);
 
+export const getProductsBySeller = (sellerId: string) =>
+    api.get<ProductItem[]>(`/api/Products/seller/${sellerId}`);
+
+export const getBrandsBySeller = (sellerId: string) =>
+    api.get<any[]>(`/api/Products/brand/seller/${sellerId}`);
+
 export const searchProducts = (paramsOrKeyword: string | SearchProductsParams) => {
     const params =
         typeof paramsOrKeyword === "string"
@@ -68,6 +78,9 @@ export const searchProducts = (paramsOrKeyword: string | SearchProductsParams) =
 
 export const createProduct = (data: CreateProductRequest) =>
     api.post("/api/Products", data);
+
+export const createBrand = (data: { name: string }) =>
+    api.post("/api/Products/brands", data);
 
 export const updateProduct = (id: string, data: UpdateProductRequest) =>
     api.put(`/api/Products/${id}`, data);

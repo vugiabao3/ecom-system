@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PaymentService.Application.DTOs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,7 @@ namespace PaymentService.Application.Events
     public class PaymentFailedEvent
     {
         public Guid OrderId { get; set; }
+        public string UserId { get; set; }
+        public List<OrderItemDto> Items { get; set; }
     }
 }

@@ -15,5 +15,7 @@ namespace UserService.Application.Users.UpdateUser
         public string Phone { get; set; }
         public string Avatar { get; set; }
         public string PasswordHash { get; set; }
+        public string? CurrentAddress { get; set; }
+        public string? CurrentLocation { get; set; }
     }
 }

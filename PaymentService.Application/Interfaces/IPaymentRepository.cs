@@ -10,6 +10,9 @@ namespace PaymentService.Application.Interfaces
     public interface IPaymentRepository
     {
         Task AddAsync(Payment payment);
+        Task<Payment> GetByPaymentIdAsync(Guid paymentId);
+        Task<Payment> GetByOrderIdAsync(Guid orderId);
+        void Update(Payment payment);
         Task SaveChangesAsync();
     }
 }

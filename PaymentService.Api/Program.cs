@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PaymentService.Application.Interfaces;
 using PaymentService.Application.Payments.Commands.ProcessPayment;
+using PaymentService.Application.Payments.Commands.ConfirmPayment;
+using PaymentService.Application.Payments.Commands.FailPayment;
 using PaymentService.Infrastructure.Messaging;
 using PaymentService.Infrastructure.Persistence;
 using PaymentService.Infrastructure.Repositories;
@@ -12,8 +14,6 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-//cho fe gọi
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
@@ -35,9 +35,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-// 🔥 Swagger + JWT
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
@@ -66,11 +64,15 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-
 builder.Services.AddSingleton<OrderCreatedConsumer>();
+builder.Services.AddSingleton<DeliverySucceededConsumer>();
 
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(ProcessPaymentHandler).Assembly));
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(typeof(ConfirmPaymentHandler).Assembly));
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(typeof(FailPaymentHandler).Assembly));
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -85,7 +87,7 @@ builder.Services.AddHttpClient<IOrderServiceClient, OrderServiceClient>(client =
 {
     client.BaseAddress = new Uri("http://orderservice:8080");
 });
-// 🔥 JWT AUTH (QUAN TRỌNG)
+
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
     {
@@ -102,25 +104,23 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
-builder.Services.AddAuthorization();
-
-
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("UserOnly", policy =>
+        policy.RequireAuthenticatedUser()
+              .RequireRole("User"));
+});
 
 var app = builder.Build();
 var consumer = app.Services.GetRequiredService<OrderCreatedConsumer>();
 consumer.Start();
-// Configure the HTTP request pipeline.
+var deliveryConsumer = app.Services.GetRequiredService<DeliverySucceededConsumer>();
+deliveryConsumer.Start();
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
-// app.UseHttpsRedirection();
-app.UseCors("AllowFrontend"); // 🔥 PHẢI Ở ĐÂY
-
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

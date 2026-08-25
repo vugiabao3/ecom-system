@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +10,7 @@ using NotificationService.Domain.Events;
 using NotificationService.Infrastructure.Services;
 using NotificationService.Infrastructure.Persistence;
 using NotificationService.Domain.Entities;
+using NotificationService.Domain.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 
@@ -45,7 +46,7 @@ namespace NotificationService.Infrastructure.Messaging
                 autoDelete: false
             );
 
-            Console.WriteLine("🔥 PaymentSucceededConsumer started...");
+            Console.WriteLine("?? PaymentSucceededConsumer started...");
 
             var consumer = new EventingBasicConsumer(channel);
 
@@ -54,19 +55,18 @@ namespace NotificationService.Infrastructure.Messaging
                 var body = ea.Body.ToArray();
                 var json = Encoding.UTF8.GetString(body);
 
-                Console.WriteLine($"🔥 Received Payment Event: {json}");
+                Console.WriteLine($"?? Received Payment Event: {json}");
 
                 var evt = JsonSerializer.Deserialize<PaymentSucceededEvent>(json);
 
                 if (evt == null) return;
-                Console.WriteLine($"💳 Payment success for order: {evt.OrderId}");
+                Console.WriteLine($"?? Payment success for order: {evt.OrderId}");
 
+                // ?? G?i notification cho kh�ch h�ng
                 await _notificationService.SendPaymentSuccess(evt.OrderId);
 
-
-                // 💾 2. TẠO SCOPE ĐỂ LẤY DB
                 using var scope = _scopeFactory.CreateScope();
-                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var repo = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
 
                 var notification = new Notification
                 {
@@ -77,8 +77,8 @@ namespace NotificationService.Infrastructure.Messaging
                     CreatedAt = DateTime.UtcNow
                 };
 
-                db.Notifications.Add(notification);
-                await db.SaveChangesAsync();
+                await repo.AddAsync(notification);
+                await repo.SaveChangesAsync();
             };
             channel.BasicConsume(
                 queue: "PaymentSucceededEvent",

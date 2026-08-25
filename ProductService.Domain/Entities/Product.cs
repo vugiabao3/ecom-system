@@ -12,13 +12,14 @@ namespace ProductService.Domain.Entities
         public string Name { get; set; }
         public decimal Price { get; set; }
         public string ImageUrl { get; set; }
+        public string? Description { get; set; }
         public int CategoryId { get; set; }
         public bool IsDeleted { get; set; }
-
+        public Guid SellerId { get; set; }
+        public Guid BrandId { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
         public Category Category { get; set; }
+        public Brand Brand { get; set; }
     }
-
-   
 }

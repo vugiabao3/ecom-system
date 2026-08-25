@@ -10,6 +10,10 @@ export interface CreateUserRequest {
 export interface UpdateUserRequest {
     fullName?: string;
     passwordHash?: string;
+    phone?: string;
+    avatar?: string;
+    currentAddress?: string;
+    currentLocation?: string;
 }
 
 export interface UserAddressDto {
@@ -37,6 +41,9 @@ export const createUser = (data: CreateUserRequest) =>
 
 export const getUserById = (id: string) =>
     userApiClient.get(`/users/${id}`);
+
+export const getUserProfile = (id: string) =>
+    userApiClient.get(`/users/${id}/profile`);
 
 export const getUserByEmail = (email: string) =>
     userApiClient.get("/users/by-email", {

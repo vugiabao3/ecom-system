@@ -43,6 +43,8 @@ namespace UserService.Application.Users.GetAllUsers
                 {
                     Id = u.Id,
                     Email = u.Email,
+                    FullName = u.FullName,
+                    Role = u.Role.ToString()
                 }).ToList(),
 
                 TotalCount = total

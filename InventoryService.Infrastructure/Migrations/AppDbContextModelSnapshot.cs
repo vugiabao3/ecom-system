@@ -20,6 +20,7 @@ namespace InventoryService.Infrastructure.Migrations
                 .HasAnnotation("ProductVersion", "8.0.26")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("InventoryService.Domain.Entities.InventoryItem", b =>
                 {
@@ -36,9 +37,18 @@ namespace InventoryService.Infrastructure.Migrations
                     b.Property<int>("Reserved")
                         .HasColumnType("int");
 
+                    b.Property<int>("Sold")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
-                    b.ToTable("InventoryItems");
+                    b.HasIndex("ProductId")
+                        .IsUnique();
+
+                    b.ToTable("InventoryItems", (string)null);
                 });
 #pragma warning restore 612, 618
         }

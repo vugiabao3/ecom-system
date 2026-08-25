@@ -12,6 +12,8 @@ import { adminSetRole, adminSetActive } from "../../services/authApi";
 import Navbar from "../../components/Navbar";
 import "../../styles/admin.css";
 
+const ROLES = ["User", "Seller", "Shipper", "Admin"];
+
 export default function AdminUsers() {
     const [users, setUsers] = useState<any[]>([]);
     const [totalCount, setTotalCount] = useState<number>(0);
@@ -90,9 +92,16 @@ export default function AdminUsers() {
         }
     };
 
-    const handleToggleRole = async (id: string, currentRole: string) => {
-        const newRole = currentRole === "Admin" ? "User" : "Admin";
-        if (!window.confirm(`Change role to ${newRole}?`)) return;
+    const handleRoleChange = async (id: string, currentRole: string) => {
+        const newRole = prompt(
+            `Enter new role for user:\nAvailable roles: ${ROLES.join(", ")}`,
+            currentRole
+        );
+        if (!newRole) return;
+        if (!ROLES.includes(newRole)) {
+            alert("Invalid role. Please enter one of: " + ROLES.join(", "));
+            return;
+        }
         try {
             await adminSetRole(id, newRole);
             alert(`Role changed to ${newRole}!`);
@@ -167,18 +176,21 @@ export default function AdminUsers() {
                                 <tbody>
                                     {users.map((u: any) => (
                                         <tr key={u.id}>
-                                            <td style={{ fontWeight: "600" }}>{u.email}</td>
                                             <td>
-                                                <span className={`admin-badge ${u.role === "Admin" ? "danger" : "info"}`}>
-                                                    {u.role || "User"}
+                                                <div style={{ fontWeight: "600", color: "#333" }}>User: {u.fullName || u.email}</div>
+                                                <div style={{ fontSize: "12px", color: "#888" }}>{u.email}</div>
+                                            </td>
+                                            <td>
+                                                <span className={`admin-badge ${u.role === "Admin" ? "danger" : u.role === "Seller" ? "warning" : u.role === "Shipper" ? "info" : "success"}`}>
+                                                    Role: {u.role || "User"}
                                                 </span>
                                             </td>
                                             <td>
                                                 <button
                                                     className="admin-btn primary"
-                                                    onClick={() => handleToggleRole(u.id, u.role)}
+                                                    onClick={() => handleRoleChange(u.id, u.role)}
                                                 >
-                                                    {u.role === "Admin" ? "Demote to User" : "Promote to Admin"}
+                                                    Change Role
                                                 </button>
 
                                                 <button

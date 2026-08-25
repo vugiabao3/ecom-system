@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ShippingService.Application.Interfaces;
 using ShippingService.Application.Shipments.Commands.UpdateShipmentStatus;
-
+using EcomSystem.Contracts.Enums;
 
 namespace ShippingService.Api.Controllers
 {
@@ -28,7 +28,7 @@ namespace ShippingService.Api.Controllers
             var result = await _mediator.Send(new UpdateShipmentStatusCommand
             {
                 ShipmentId = id,
-                Status = "DELIVERING"
+                Status = ShipmentStatus.Delivering
             });
 
             if (!result)
@@ -44,7 +44,7 @@ namespace ShippingService.Api.Controllers
             var result = await _mediator.Send(new UpdateShipmentStatusCommand
             {
                 ShipmentId = id,
-                Status = "DELIVERED"
+                Status = ShipmentStatus.Delivered
             });
 
             if (!result)

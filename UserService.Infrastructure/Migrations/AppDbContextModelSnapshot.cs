@@ -34,9 +34,15 @@ namespace UseService.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("CurrentAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CurrentLocation")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -51,9 +57,17 @@ namespace UseService.Infrastructure.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Role");
+
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("UserService.Domain.Entities.UserActivityLog", b =>
@@ -77,7 +91,9 @@ namespace UseService.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserActivityLogs");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserActivityLogs", (string)null);
                 });
 
             modelBuilder.Entity("UserService.Domain.Entities.UserAddress", b =>
@@ -123,7 +139,7 @@ namespace UseService.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserAddresses");
+                    b.ToTable("UserAddresses", (string)null);
                 });
 
             modelBuilder.Entity("UserService.Domain.Entities.UserSession", b =>
@@ -154,7 +170,9 @@ namespace UseService.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserSessions");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserSessions", (string)null);
                 });
 
             modelBuilder.Entity("UserService.Domain.Entities.UserAddress", b =>

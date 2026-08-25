@@ -11,6 +11,7 @@ using UserService.Application.Users.GetUserActivity;
 using UserService.Application.Users.GetUserAddresses;
 using UserService.Application.Users.GetUserByEmail;
 using UserService.Application.Users.GetUserById;
+using UserService.Application.Users.GetUserProfile;
 using UserService.Application.Users.GetUserDevices;
 using UserService.Application.Users.LogoutAllDevices;
 using UserService.Application.Users.RemoveRole;
@@ -57,6 +58,14 @@ namespace UserService.Api.Controllers
             var result = await _mediator.Send(new GetUserByIdQuery(id));
             return Ok(result);
         }
+
+        // GET /users/{id}/profile
+        [HttpGet("{id}/profile")]
+        public async Task<IActionResult> GetUserProfile(Guid id)
+        {
+            var result = await _mediator.Send(new GetUserProfileQuery(id));
+            return Ok(result);
+        }
         
         // 🔥 FLOW 3
         // GET /users/by-email?email=abc@gmail.com
@@ -77,7 +86,11 @@ namespace UserService.Api.Controllers
             {
                 Id = id,
                 FullName = request.FullName,
-                PasswordHash = request.PasswordHash
+                PasswordHash = request.PasswordHash,
+                Phone = request.Phone,
+                Avatar = request.Avatar,
+                CurrentAddress = request.CurrentAddress,
+                CurrentLocation = request.CurrentLocation
             };
 
             var result = await _mediator.Send(command);

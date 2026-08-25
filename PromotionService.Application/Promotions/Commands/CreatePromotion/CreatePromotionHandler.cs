@@ -7,45 +7,57 @@ using System.Threading.Tasks;
 using PromotionService.Application.Interfaces;
 using PromotionService.Domain.Entities;
 using MediatR;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 namespace PromotionService.Application.Promotions.Commands.CreatePromotion;
 
 public class CreatePromotionHandler
- : IRequestHandler<CreatePromotionCommand, CreatePromotionResponse>
+  : IRequestHandler<CreatePromotionCommand, CreatePromotionResponse>
 {
     private readonly IPromotionRepository _promotionRepository;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public CreatePromotionHandler(
-        IPromotionRepository promotionRepository)
+        IPromotionRepository promotionRepository,
+        IHttpContextAccessor httpContextAccessor)
     {
         _promotionRepository = promotionRepository;
+        _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<CreatePromotionResponse> Handle(
-        CreatePromotionCommand command)
-    {
-        var promotion = new Promotion
+        public async Task<CreatePromotionResponse> Handle(
+            CreatePromotionCommand command,
+            CancellationToken cancellationToken)
         {
-            Id = Guid.NewGuid(),
+            // 🔥 SellerId is taken from the current authenticated user
+            var userIdClaim = _httpContextAccessor.HttpContext?.User
+                ?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            Code = command.Code,
+            var sellerId = command.SellerId;
+            if (!string.IsNullOrEmpty(userIdClaim))
+            {
+                sellerId = Guid.Parse(userIdClaim);
+            }
 
-            DiscountPercent = command.DiscountPercent,
+            var promotion = new Promotion
+            {
+                Id = Guid.NewGuid(),
+                Code = command.Code,
+                DiscountPercent = command.DiscountPercent,
+                IsActive = true,
+                StartDate = command.StartDate,
+                EndDate = command.EndDate,
+                Quantity = command.Quantity,
+                SellerId = sellerId,
+                BrandId = command.BrandId
+            };
 
-            IsActive = true,
+            await _promotionRepository.AddAsync(promotion);
 
-            StartDate = command.StartDate,
-
-            EndDate = command.EndDate,
-
-            Quantity = command.Quantity
-        };
-
-        await _promotionRepository.AddAsync(promotion);
-
-        return new CreatePromotionResponse
-        {
-            PromotionId = promotion.Id,
-            Message = "Promotion created successfully"
-        };
-    }
+            return new CreatePromotionResponse
+            {
+                PromotionId = promotion.Id,
+                Message = "Promotion created successfully"
+            };
+        }
 }

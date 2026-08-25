@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createOrder } from "../services/orderApi";
+import { createPayment } from "../services/paymentApi";
 import { getCart } from "../services/cartApi";
 import { getUserAddresses, type UserAddressDto } from "../services/userApi";
 import { getAllPromotions, type PromotionDto } from "../services/promotionApi";
@@ -12,12 +13,18 @@ import "../styles/checkout.css";
 
 export default function Checkout() {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, isAdmin, isSeller, isShipper } = useAuth();
+
+    if (isAdmin || isSeller || isShipper) {
+        navigate("/");
+        return null;
+    }
 
     const [address, setAddress] = useState("");
     const [phone, setPhone] = useState("");
     const [receiverName, setReceiverName] = useState("");
     const [couponCode, setCouponCode] = useState("");
+    const [paymentMethod, setPaymentMethod] = useState("QR");
 
     const [cart, setCart] = useState<any>(null);
     const [savedAddresses, setSavedAddresses] = useState<UserAddressDto[]>([]);
@@ -70,19 +77,31 @@ export default function Checkout() {
                 phone,
                 receiverName,
                 couponCode: couponCode.trim() || undefined,
+                paymentMethod,
             });
 
-            navigate("/payment", {
-                state: res.data,
-            });
+            if (paymentMethod === "COD") {
+                await createPayment({
+                    orderId: res.data.orderId,
+                    paymentMethod: "COD",
+                });
+                navigate("/orders");
+            } else {
+                await createPayment({
+                    orderId: res.data.orderId,
+                    paymentMethod: "QR",
+                });
+                navigate("/orders");
+            }
         } catch (err: any) {
-            setError(err.response?.data?.message || err.response?.data || "Failed to create order. Please check your cart or stock.");
+            setError("Mua sản phẩm không thành công");
         } finally {
             setLoading(false);
         }
     };
 
     const subTotal = cart?.totalPrice || 0;
+    const shippingFee = subTotal < 200000 ? 30000 : 0;
 
     return (
         <div>
@@ -110,6 +129,46 @@ export default function Checkout() {
                                 setReceiverName={setReceiverName}
                                 setCouponCode={setCouponCode}
                             />
+                        </div>
+
+                        <div className="checkout-card" style={{ marginTop: "16px" }}>
+                            <h3 style={{ fontSize: "16px", marginBottom: "12px", color: "#333" }}>
+                                💳 Payment Method
+                            </h3>
+                            <div style={{ display: "flex", gap: "12px" }}>
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod("QR")}
+                                    style={{
+                                        flex: 1,
+                                        padding: "12px",
+                                        borderRadius: "8px",
+                                        border: paymentMethod === "QR" ? "2px solid #ee4d2d" : "1px solid #ddd",
+                                        background: paymentMethod === "QR" ? "#fff5f2" : "white",
+                                        cursor: "pointer",
+                                        fontWeight: paymentMethod === "QR" ? "700" : "500",
+                                        color: paymentMethod === "QR" ? "#ee4d2d" : "#333",
+                                    }}
+                                >
+                                    📱 QR Payment
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod("COD")}
+                                    style={{
+                                        flex: 1,
+                                        padding: "12px",
+                                        borderRadius: "8px",
+                                        border: paymentMethod === "COD" ? "2px solid #ee4d2d" : "1px solid #ddd",
+                                        background: paymentMethod === "COD" ? "#fff5f2" : "white",
+                                        cursor: "pointer",
+                                        fontWeight: paymentMethod === "COD" ? "700" : "500",
+                                        color: paymentMethod === "COD" ? "#ee4d2d" : "#333",
+                                    }}
+                                >
+                                    💵 Cash On Delivery
+                                </button>
+                            </div>
                         </div>
 
                         {/* Available Promotions */}
@@ -146,7 +205,8 @@ export default function Checkout() {
                         <div className="checkout-card">
                             <CheckoutSummary
                                 subTotal={subTotal}
-                                totalPrice={subTotal}
+                                shippingFee={shippingFee}
+                                totalPrice={subTotal + shippingFee}
                             />
 
                             <button

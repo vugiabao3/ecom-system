@@ -7,8 +7,6 @@ export default function PaymentMethodBox({ paymentMethod, setPaymentMethod }: Pr
     const methods = [
         { id: "QR", label: "📱 QR Code Payment", desc: "Scan to pay instantly via banking app" },
         { id: "COD", label: "💵 Cash On Delivery", desc: "Pay with cash upon package receipt" },
-        { id: "VNPAY", label: "💳 VNPay", desc: "Pay via VNPay gateway / ATM card" },
-        { id: "MOMO", label: "👛 MoMo e-Wallet", desc: "Pay quickly using your MoMo account" },
     ];
 
     return (

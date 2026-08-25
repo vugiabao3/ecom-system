@@ -92,5 +92,23 @@ namespace AuthService.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("profile")]
+        [Authorize]
+        public IActionResult GetProfile()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                         ?? User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            var email = User.FindFirst(ClaimTypes.Email)?.Value
+                        ?? User.FindFirst(JwtRegisteredClaimNames.Email)?.Value;
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            return Ok(new
+            {
+                UserId = userId,
+                Email = email,
+                Role = role
+            });
+        }
+
     }
 }

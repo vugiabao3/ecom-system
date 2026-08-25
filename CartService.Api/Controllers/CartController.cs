@@ -5,6 +5,7 @@ using CartService.Application.Cart.Commands.AddToCart;
 using CartService.Application.Cart.Queries.GetCart;
 using CartService.Application.Cart.Commands.RemoveItem;
 using CartService.Application.Cart.Commands.ClearCart;
+using CartService.Application.Cart.Commands.UpdateCartItemQuantity;
 
 namespace CartService.Api.Controllers
 {
@@ -21,7 +22,7 @@ namespace CartService.Api.Controllers
 
         // 🔥 FLOW 1
         [HttpPost]
-        [Authorize]
+        [Authorize(Policy = "UserOnly")]
         public async Task<IActionResult> AddToCart(AddToCartCommand command)
         {
             var result = await _mediator.Send(command);
@@ -29,7 +30,7 @@ namespace CartService.Api.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        [Authorize(Policy = "UserOnly")]
         public async Task<IActionResult> GetCart()
         {
             var result = await _mediator.Send(new GetCartQuery());
@@ -37,17 +38,25 @@ namespace CartService.Api.Controllers
         }
 
         [HttpDelete]
-        [Authorize]
+        [Authorize(Policy = "UserOnly")]
         public async Task<IActionResult> RemoveItem(RemoveItemCommand command)
         {
             var result = await _mediator.Send(command);
             return Ok(result);
         }
         [HttpDelete("clear")]
-        [Authorize]
+        [Authorize(Policy = "UserOnly")]
         public async Task<IActionResult> ClearCart()
         {
             var result = await _mediator.Send(new ClearCartCommand());
+            return Ok(result);
+        }
+
+        [HttpPut("quantity")]
+        [Authorize(Policy = "UserOnly")]
+        public async Task<IActionResult> UpdateQuantity(UpdateCartItemQuantityCommand command)
+        {
+            var result = await _mediator.Send(command);
             return Ok(result);
         }
     }

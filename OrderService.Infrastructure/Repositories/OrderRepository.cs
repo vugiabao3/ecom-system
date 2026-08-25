@@ -5,7 +5,6 @@ using OrderService.Infrastructure.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace OrderService.Infrastructure.Repositories
@@ -24,11 +23,31 @@ namespace OrderService.Infrastructure.Repositories
             _db.Orders.Add(order);
             await _db.SaveChangesAsync();
         }
+
         public async Task<Order> GetByIdAsync(Guid id)
         {
             return await _db.Orders
-                .Include(o => o.Items) // 🔥 quan trọng
+                .Include(o => o.Items)
+                .Include(o => o.StatusHistory)
                 .FirstOrDefaultAsync(o => o.Id == id);
+        }
+
+        public async Task<List<Order>> GetByUserIdAsync(string userId)
+        {
+            return await _db.Orders
+                .Include(o => o.Items)
+                .Include(o => o.StatusHistory)
+                .Where(o => o.UserId == userId)
+                .ToListAsync();
+        }
+
+        public async Task<List<Order>> GetBySellerIdAsync(Guid sellerId)
+        {
+            return await _db.Orders
+                .Include(o => o.Items)
+                .Include(o => o.StatusHistory)
+                .Where(o => o.Items.Any(i => i.SellerId == sellerId))
+                .ToListAsync();
         }
 
         public void Update(Order order)

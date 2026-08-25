@@ -4,12 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MediatR;
 using OrderService.Application.Interfaces;
 using OrderService.Domain.Entities;
 using OrderService.Application.Events;
 using OrderService.Application.DTOs;
-using OrderService.Application.Events.OrderService.Application.Events;
+using EcomSystem.Contracts.Enums;
 namespace OrderService.Application.Orders.Commands.CreateOrder
 {
     public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, CreateOrderResponse>
@@ -43,17 +42,14 @@ namespace OrderService.Application.Orders.Commands.CreateOrder
             if (string.IsNullOrEmpty(userId))
                 throw new Exception("Unauthorized");
 
-            // 🔥 1. lấy cart
             var cart = await _cartClient.GetCart();
 
             if (!cart.Items.Any())
                 throw new Exception("Cart empty");
 
-            // 🔥 2. validate product
             var productIds = cart.Items.Select(x => x.ProductId).ToList();
             var products = await _productClient.GetProductsByIds(productIds);
 
-            // 1. tạo order trước
             var order = new Order
             {
                 Id = Guid.NewGuid(),
@@ -61,7 +57,9 @@ namespace OrderService.Application.Orders.Commands.CreateOrder
                 Address = request.Address,
                 Phone = request.Phone ?? "N/A",
                 ReceiverName = request.ReceiverName ?? "Unknown",
-                Status = "PENDING",
+                Status = OrderStatus.Pending,
+                PaymentStatus = PaymentStatus.Pending,
+                PaymentMethod = Enum.Parse<PaymentMethod>(request.PaymentMethod, true),
                 Items = new List<OrderItem>()
             };
 
@@ -80,7 +78,8 @@ namespace OrderService.Application.Orders.Commands.CreateOrder
                     ProductName = product.Name,
                     Price = product.Price,
                     Quantity = item.Quantity,
-                    OrderId = order.Id   // 🔥 FIX FK (rất quan trọng)
+                    OrderId = order.Id,
+                    SellerId = product.SellerId
                 };
 
                 total += product.Price * item.Quantity;
@@ -89,34 +88,30 @@ namespace OrderService.Application.Orders.Commands.CreateOrder
 
             decimal subTotal = total;
             decimal discount = 0;
-            decimal finalPrice = total;
+            decimal shippingFee = subTotal < 200000 ? 30000 : 0;
+            decimal finalPrice = total + shippingFee;
 
             if (!string.IsNullOrEmpty(request.CouponCode))
             {
-                var promo = await _promotionClient.Apply(request.CouponCode, subTotal);
-                Console.WriteLine($"🔥 PROMO DISCOUNT: {promo.discountAmount}");
-                Console.WriteLine($"🔥 PROMO FINAL: {promo.finalAmount}");
+                var promo = await _promotionClient.Apply(request.CouponCode, subTotal, null, null);
                 if (promo.isValid)
                 {
-                    discount = promo.discountAmount;   // 🔥 lấy từ promotion
-                    finalPrice = promo.finalAmount;    // 🔥 hoặc subTotal - discount
+                    discount = promo.discountAmount;
+                    finalPrice = subTotal + shippingFee - discount;
                 }
             }
+
             order.SubTotal = subTotal;
+            order.ShippingFee = shippingFee;
             order.Discount = discount;
             order.TotalPrice = finalPrice;
 
-
-            // 🔥 3. save DB
             await _orderRepository.AddAsync(order);
 
-            // 🔥 4. clear cart
-            await _cartClient.ClearCart();
-
-            // 🔥 5. publish event
             var eventItems = order.Items.Select(x => new DTOs.OrderItemDto
             {
                 ProductId = x.ProductId,
+                SellerId = x.SellerId,
                 Quantity = x.Quantity
             }).ToList();
             await _eventBus.PublishAsync("OrderCreated", new OrderCreatedEvent
@@ -124,14 +119,20 @@ namespace OrderService.Application.Orders.Commands.CreateOrder
                 OrderId = order.Id,
                 Items = eventItems,
                 TotalAmount = order.TotalPrice,
-                UserId = userId
+                UserId = userId,
+                SubTotal = subTotal,
+                ShippingFee = shippingFee,
+                PaymentMethod = order.PaymentMethod.ToString()
             });
+
             return new CreateOrderResponse
             {
                 OrderId = order.Id,
                 SubTotal = subTotal,
                 Discount = discount,
-                TotalPrice = finalPrice
+                ShippingFee = shippingFee,
+                TotalPrice = finalPrice,
+                PaymentMethod = order.PaymentMethod.ToString()
             };
         }
     }

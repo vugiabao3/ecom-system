@@ -11,8 +11,8 @@ namespace PaymentService.Application.Events
     {
         public Guid OrderId { get; set; }
         public List<OrderItemDto> Items { get; set; }
-        public decimal TotalAmount { get; set; } // 🔥 thêm
-
-        public string UserId { get; set; } // 🔥 thêm
+        public decimal TotalAmount { get; set; }
+        public string UserId { get; set; }
+        public string PaymentMethod { get; set; } = "QR";
     }
 }

@@ -11,8 +11,7 @@ namespace OrderService.Application.Orders.Commands.CreateOrder
         public string Address { get; set; }
         public string Phone { get; set; }
         public string ReceiverName { get; set; }
-        public string? CouponCode { get; set; } // 🔥 THÊM
-
-
+        public string? CouponCode { get; set; }
+        public string PaymentMethod { get; set; } = "QR";
     }
 }

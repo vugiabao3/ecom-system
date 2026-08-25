@@ -1,5 +1,6 @@
 
 using CartService.Application.Cart.Commands.AddToCart;
+using CartService.Application.Cart.Commands.UpdateCartItemQuantity;
 using CartService.Application.Cart.EventHandlers;
 using CartService.Application.Events;
 using CartService.Application.Interfaces;
@@ -76,6 +77,10 @@ builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(typeof(AddToCartHandler).Assembly);
 });
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(UpdateCartItemQuantityHandler).Assembly);
+});
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<ProductDeletedEventHandler>();
@@ -92,6 +97,8 @@ builder.Services.AddHttpClient<
     });
 builder.Services.AddScoped<ProductUpdatedEventHandler>();
 builder.Services.AddSingleton<ProductUpdatedConsumer>();
+builder.Services.AddScoped<PaymentSucceededEventHandler>();
+builder.Services.AddSingleton<PaymentSucceededConsumer>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(options =>
 {
@@ -111,12 +118,21 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("UserOnly", policy =>
+        policy.RequireAuthenticatedUser()
+              .RequireRole("User"));
+});
+
 var app = builder.Build();
 
 var consumer = app.Services.GetRequiredService<ProductUpdatedConsumer>();
 consumer.Start();
 var consumer2 = app.Services.GetRequiredService<ProductDeletedConsumer>();
 consumer2.Start();
+var paymentConsumer = app.Services.GetRequiredService<PaymentSucceededConsumer>();
+paymentConsumer.Start();
 
 // Configure the HTTP request pipeline.
 

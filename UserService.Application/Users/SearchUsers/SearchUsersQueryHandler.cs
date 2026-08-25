@@ -44,6 +44,8 @@ namespace UserService.Application.Users.SearchUsers
                 {
                     Id = u.Id,
                     Email = u.Email,
+                    FullName = u.FullName,
+                    Role = u.Role.ToString()
                 }).ToList(),
 
                 TotalCount = total

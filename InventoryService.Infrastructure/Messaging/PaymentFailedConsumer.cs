@@ -28,7 +28,7 @@ namespace InventoryService.Infrastructure.Messaging
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
 
-            channel.QueueDeclare("payment.failed", true, false, false);
+            channel.QueueDeclare("PaymentFailedEvent", true, false, false);
 
             var consumer = new EventingBasicConsumer(channel);
 
@@ -47,7 +47,7 @@ namespace InventoryService.Infrastructure.Messaging
                 await handler.Handle(@event);
             };
 
-            channel.BasicConsume("payment.failed", true, consumer);
+            channel.BasicConsume("PaymentFailedEvent", true, consumer);
         }
     }
 }

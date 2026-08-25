@@ -44,13 +44,15 @@ namespace ProductService.Application.Products.Commands.UpdateProduct
                 throw new Exception("Product not found");
 
             // 🔥 3. CHECK OWNERSHIP
-            if (product.CreatedBy != _currentUser.UserId)
+            if (product.CreatedBy != _currentUser.UserId && _currentUser.Role != "Admin")
                 throw new Exception("Not owner");
 
             // 🔥 4. UPDATE FIELDS
             product.Name = request.Name;
             product.Price = request.Price;
             product.CategoryId = request.CategoryId;
+            product.SellerId = Guid.Parse(_currentUser.UserId);
+            product.BrandId = request.BrandId;
 
             // 🔥 5. SAVE DB
             await _productRepository.UpdateAsync(product);

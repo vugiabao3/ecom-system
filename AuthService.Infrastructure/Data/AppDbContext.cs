@@ -19,5 +19,25 @@ namespace AuthService.Infrastructure.Data
         public DbSet<AuthUser> AuthUsers { get; set; }
 
         public DbSet<UserSession> UserSessions { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<AuthUser>(entity =>
+            {
+                entity.ToTable("AuthUsers");
+                entity.HasKey(x => x.Id);
+                entity.Property(x => x.Email).IsRequired();
+                entity.HasIndex(x => x.Email).IsUnique();
+            });
+
+            modelBuilder.Entity<UserSession>(entity =>
+            {
+                entity.ToTable("UserSessions");
+                entity.HasKey(x => x.Id);
+                entity.HasIndex(x => x.UserId);
+            });
+        }
     }
 }

@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CartService.Domain\CartService.Domain.csproj" />
+    <ProjectReference Include="..\PaymentService.Application\PaymentService.Application.csproj" />
   </ItemGroup>
 
 </Project>

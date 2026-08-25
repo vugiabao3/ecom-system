@@ -10,5 +10,6 @@ namespace PaymentService.Application.Interfaces
     public interface IOrderServiceClient
     {
         Task<OrderDto?> GetOrderById(Guid orderId);
+        Task UpdateOrderPaymentStatus(Guid orderId, string paymentStatus);
     }
 }

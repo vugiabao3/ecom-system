@@ -1,17 +1,24 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import PaymentMethodBox from "../components/PaymentMethodBox";
 import QRPayment from "../components/QRPayment";
 import { createPayment } from "../services/paymentApi";
+import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 import "../styles/payment.css";
 
 export default function Payment() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { isAdmin, isSeller, isShipper } = useAuth();
+
+    if (isAdmin || isSeller || isShipper) {
+        navigate("/");
+        return null;
+    }
+
     const order = location.state;
 
-    const [paymentMethod, setPaymentMethod] = useState("QR");
+    const paymentMethod = order?.paymentMethod || "QR";
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -32,15 +39,27 @@ export default function Payment() {
                 paymentMethod,
             });
 
-            navigate("/payment-success", {
-                state: {
-                    orderId,
-                    paymentId: res.data?.paymentId,
-                    status: res.data?.status,
-                    totalPrice,
-                    paymentMethod,
-                },
-            });
+            if (paymentMethod === "QR") {
+                navigate("/qr-payment", {
+                    state: {
+                        orderId,
+                        paymentId: res.data?.paymentId,
+                        status: res.data?.status,
+                        totalPrice,
+                        paymentMethod,
+                    },
+                });
+            } else {
+                navigate("/orders", {
+                    state: {
+                        orderId,
+                        paymentId: res.data?.paymentId,
+                        status: res.data?.status,
+                        totalPrice,
+                        paymentMethod,
+                    },
+                });
+            }
         } catch (err: any) {
             console.error("Payment error:", err);
             setError(err.response?.data?.message || "Payment processing failed.");
@@ -96,15 +115,20 @@ export default function Payment() {
                             {totalPrice.toLocaleString()} đ
                         </strong>
                     </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: "8px", fontSize: "14px", color: "#666" }}>
+                        <span>Payment Method:</span>
+                        <span style={{ fontWeight: "600" }}>{paymentMethod === "QR" ? "QR Code Payment" : "Cash On Delivery"}</span>
+                    </div>
                 </div>
-
-                <PaymentMethodBox
-                    paymentMethod={paymentMethod}
-                    setPaymentMethod={setPaymentMethod}
-                />
 
                 {paymentMethod === "QR" && (
                     <QRPayment amount={totalPrice} />
+                )}
+
+                {paymentMethod === "COD" && (
+                    <div style={{ padding: "16px", background: "#f8f9fa", borderRadius: "8px", marginTop: "16px", textAlign: "center", color: "#666" }}>
+                        You will pay with cash upon delivery. No online payment required.
+                    </div>
                 )}
 
                 <button

@@ -24,17 +24,20 @@ namespace InventoryService.Application.Inventory.EventHandlers
                 var inventory = await _repo.GetByProductIdAsync(item.ProductId);
 
                 if (inventory == null)
-                    throw new Exception("Inventory not found");
+                    continue;
 
-                // 🔥 kiểm tra reserved trước
-                if (inventory.Reserved < item.Quantity)
-                    throw new Exception("Invalid reserved stock");
+                if (inventory.Reserved >= item.Quantity)
+                {
+                    inventory.Reserved -= item.Quantity;
+                }
+                else
+                {
+                    inventory.Available -= item.Quantity;
+                    if (inventory.Available < 0) inventory.Available = 0;
+                    inventory.Reserved = 0;
+                }
 
-                // 💳 FLOW 2: CHUYỂN RESERVED → SOLD
-                inventory.Reserved -= item.Quantity;
-
-                // ❗ KHÔNG đụng Available nữa
-                // Available đã bị trừ ở FLOW 1
+                inventory.Sold += item.Quantity;
 
                 _repo.Update(inventory);
             }

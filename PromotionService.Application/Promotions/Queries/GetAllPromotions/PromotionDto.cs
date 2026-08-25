@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PromotionService.Application
 .Promotions.Queries.GetAllPromotions;
@@ -23,4 +19,8 @@ public class PromotionDto
     public DateTime EndDate { get; set; }
 
     public int Quantity { get; set; }
+
+    public Guid SellerId { get; set; }
+
+    public Guid? BrandId { get; set; }
 }

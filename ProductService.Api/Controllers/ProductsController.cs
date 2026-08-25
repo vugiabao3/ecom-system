@@ -6,10 +6,14 @@ using ProductService.Application.Products.Queries.GetProductDetail;
 using ProductService.Application.Products.Commands.CreateProduct;
 using ProductService.Application.Products.Commands.UpdateProduct;
 using ProductService.Application.Products.Commands.DeleteProduct;
-
+using ProductService.Application.Products.Commands.CreateBrand;
+using ProductService.Application.Products.Commands.UpdateBrand;
+using ProductService.Application.Products.Commands.DeleteBrand;
+using ProductService.Application.Products.Queries.GetProductsBySeller;
 using ProductService.Application.Products.Commands.RestoreProduct;
 using ProductService.Application.Products.Queries.SearchProduct;
 using ProductService.Application.Products.Queries.GetProductsByIds;
+using ProductService.Application.Products.Queries.GetBrandsBySeller;
 
 namespace ProductService.Api.Controllers
 {
@@ -44,7 +48,7 @@ namespace ProductService.Api.Controllers
         }
 
         [HttpPost]
-        [Authorize] // 🔥 cần login
+        [Authorize]
         public async Task<IActionResult> CreateProduct(CreateProductCommand command)
         {
             var result = await _mediator.Send(command);
@@ -81,6 +85,45 @@ namespace ProductService.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("seller/{sellerId}")]
+        [Authorize]
+        public async Task<IActionResult> GetProductsBySeller(Guid sellerId)
+        {
+            var result = await _mediator.Send(new GetProductsBySellerQuery { SellerId = sellerId });
+            return Ok(result);
+        }
 
+        [HttpPost("brands")]
+        [Authorize(Roles = "Admin,Seller")]
+        public async Task<IActionResult> CreateBrand(CreateBrandCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        [HttpPut("brands/{id}")]
+        [Authorize(Roles = "Admin,Seller")]
+        public async Task<IActionResult> UpdateBrand(Guid id, UpdateBrandCommand command)
+        {
+            command.Id = id;
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        [HttpDelete("brands/{id}")]
+        [Authorize(Roles = "Admin,Seller")]
+        public async Task<IActionResult> DeleteBrand(Guid id)
+        {
+            var result = await _mediator.Send(new DeleteBrandCommand { Id = id });
+            return Ok(result);
+        }
+
+        [HttpGet("brands/seller/{sellerId}")]
+        [Authorize(Roles = "Admin,Seller")]
+        public async Task<IActionResult> GetBrandsBySeller(Guid sellerId)
+        {
+            var result = await _mediator.Send(new GetBrandsBySellerQuery { SellerId = sellerId });
+            return Ok(result);
+        }
     }
 }

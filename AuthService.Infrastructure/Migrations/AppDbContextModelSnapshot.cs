@@ -30,15 +30,14 @@ namespace AuthService.Infrastructure.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -46,7 +45,10 @@ namespace AuthService.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AuthUsers");
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("AuthUsers", (string)null);
                 });
 
             modelBuilder.Entity("AuthService.Domain.Entities.UserSession", b =>
@@ -70,7 +72,9 @@ namespace AuthService.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserSessions");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserSessions", (string)null);
                 });
 #pragma warning restore 612, 618
         }

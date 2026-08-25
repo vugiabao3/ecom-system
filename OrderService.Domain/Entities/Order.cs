@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EcomSystem.Contracts.Enums;
 
 namespace OrderService.Domain.Entities
 {
@@ -11,13 +12,18 @@ namespace OrderService.Domain.Entities
         public Guid Id { get; set; }
         public string UserId { get; set; }
         public string Address { get; set; }
-        public string Status { get; set; } = "PENDING";
-        public decimal SubTotal { get; set; }   // trước giảm
-        public decimal Discount { get; set; }   // giảm bao nhiêu
-        public decimal TotalPrice { get; set; } // sau giảm
+        public OrderStatus Status { get; set; } = OrderStatus.Pending;
+        public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
+        public decimal SubTotal { get; set; }
+        public decimal ShippingFee { get; set; }
+        public decimal Discount { get; set; }
+        public decimal TotalPrice { get; set; }
         public string Phone { get; set; }
         public string ReceiverName { get; set; }
-
+        public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.QR;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; }
         public List<OrderItem> Items { get; set; }
+        public List<OrderStatusHistory> StatusHistory { get; set; }
     }
 }

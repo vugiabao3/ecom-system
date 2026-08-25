@@ -5,8 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using InventoryService.Application.Interfaces;
 using InventoryService.Application.Events;
-using System;
-using System.Threading.Tasks;
 
 namespace InventoryService.Application.Inventory.EventHandlers
 {
@@ -21,6 +19,9 @@ namespace InventoryService.Application.Inventory.EventHandlers
 
         public async Task Handle(PaymentFailedEvent @event)
         {
+            if (@event?.Items == null || !@event.Items.Any())
+                return;
+
             foreach (var item in @event.Items)
             {
                 var inventory = await _repo.GetByProductIdAsync(item.ProductId);
@@ -28,12 +29,13 @@ namespace InventoryService.Application.Inventory.EventHandlers
                 if (inventory == null)
                     continue;
 
-                // 🔥 ROLLBACK LOGIC
                 inventory.Reserved -= item.Quantity;
                 inventory.Available += item.Quantity;
 
                 if (inventory.Reserved < 0)
                     inventory.Reserved = 0;
+                if (inventory.Available < 0)
+                    inventory.Available = 0;
 
                 _repo.Update(inventory);
             }

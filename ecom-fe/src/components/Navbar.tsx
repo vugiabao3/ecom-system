@@ -5,12 +5,21 @@ import "../styles/navbar.css";
 
 export default function Navbar() {
     const navigate = useNavigate();
-    const { user, isAuthenticated, isAdmin, logout } = useAuth();
+    const { user, isAuthenticated, isAdmin, isSeller, isShipper, logout } = useAuth();
 
     const handleLogout = async () => {
         await logout();
         navigate("/login");
     };
+
+    const getRoleBadge = () => {
+        if (isAdmin) return { text: "ADMIN", color: "#7950f2" };
+        if (isSeller) return { text: "SELLER", color: "#2b8a3e" };
+        if (isShipper) return { text: "SHIPPER", color: "#228be6" };
+        return null;
+    };
+
+    const roleBadge = getRoleBadge();
 
     return (
         <header className="navbar-container">
@@ -29,9 +38,23 @@ export default function Navbar() {
                             👤 Profile
                         </Link>
 
-                        <Link to="/orders" className="navbar-link">
-                            📦 Orders
-                        </Link>
+                        {!isAdmin && (
+                            <Link to="/orders" className="navbar-link">
+                                📦 Orders
+                            </Link>
+                        )}
+
+                        {isSeller && (
+                            <Link to="/seller" className="navbar-admin-badge" style={{ background: "#2b8a3e" }}>
+                                🏪 Seller Portal
+                            </Link>
+                        )}
+
+                        {isShipper && (
+                            <Link to="/shipper" className="navbar-admin-badge" style={{ background: "#228be6" }}>
+                                🚚 Shipper Portal
+                            </Link>
+                        )}
 
                         {isAdmin && (
                             <Link to="/admin" className="navbar-admin-badge">
@@ -39,9 +62,25 @@ export default function Navbar() {
                             </Link>
                         )}
 
-                        <CartIcon />
+                        {!isAdmin && !isSeller && !isShipper && (
+                            <CartIcon />
+                        )}
 
                         <div className="navbar-user-section">
+                            {roleBadge && (
+                                <span
+                                    style={{
+                                        background: roleBadge.color,
+                                        color: "white",
+                                        padding: "2px 8px",
+                                        borderRadius: "4px",
+                                        fontSize: "11px",
+                                        fontWeight: "700",
+                                    }}
+                                >
+                                    {roleBadge.text}
+                                </span>
+                            )}
                             <span className="navbar-user-email">
                                 {user?.email}
                             </span>

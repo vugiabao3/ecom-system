@@ -53,7 +53,7 @@ public class RefreshTokenCommandHandler
         {
             UserId = user.Id,
             Email = user.Email,
-            Role = user.Role
+            Role = user.Role.ToString()
         };
         var accessToken = _jwt.GenerateAccessToken(tokenUser);
         var refreshToken = _jwt.GenerateRefreshToken();

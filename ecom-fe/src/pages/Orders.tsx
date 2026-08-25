@@ -1,115 +1,191 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import OrderStatusBadge from "../components/OrderStatusBadge";
+import { getOrdersByUserId, type OrderDto } from "../services/orderApi";
+import { useAuth } from "../context/AuthContext";
+
+const STATUS_TABS = [
+    { key: "ALL", label: "All" },
+    { key: "PENDING", label: "Pending" },
+    { key: "CONFIRMED", label: "Confirmed" },
+    { key: "SHIPPING", label: "Shipping" },
+    { key: "DELIVERED", label: "Delivered" },
+    { key: "RETURNED", label: "Returned" },
+    { key: "CANCELLED", label: "Cancelled" },
+];
 
 export default function Orders() {
     const navigate = useNavigate();
-    const [orderId, setOrderId] = useState("");
+    const { user } = useAuth();
+    const [orders, setOrders] = useState<OrderDto[]>([]);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState("ALL");
 
-    const handleLookup = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!orderId.trim()) {
-            setError("Please enter an order ID.");
-            return;
-        }
-        setError(null);
-        navigate(`/orders/${orderId.trim()}`);
+    useEffect(() => {
+        const loadOrders = async () => {
+            if (!user?.id) return;
+            setLoading(true);
+            setError(null);
+            try {
+                const res = await getOrdersByUserId(user.id);
+                setOrders(res.data || []);
+            } catch (err: any) {
+                setError(err.response?.data?.message || "Failed to load orders.");
+                setOrders([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadOrders();
+    }, [user?.id]);
+
+    const filteredOrders = activeTab === "ALL"
+        ? orders
+        : orders.filter((o) => o.status === activeTab);
+
+    const formatDate = (id: string) => {
+        return id.substring(0, 8);
     };
 
     return (
         <div>
             <Navbar />
-            <div style={{ maxWidth: "700px", margin: "40px auto", padding: "20px" }}>
-                <div
-                    style={{
-                        background: "white",
-                        borderRadius: "12px",
-                        padding: "32px",
-                        boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
-                    }}
-                >
-                    <h1 style={{ fontSize: "24px", color: "#333", marginBottom: "8px" }}>
-                        📦 My Orders
-                    </h1>
-                    <p style={{ color: "#666", marginBottom: "24px" }}>
-                        Enter your order ID to view order details, payment status, and shipment tracking.
-                    </p>
+            <div style={{ maxWidth: "1000px", margin: "30px auto", padding: "20px" }}>
+                <h1 style={{ fontSize: "24px", color: "#333", marginBottom: "20px" }}>
+                    📦 My Orders
+                </h1>
 
-                    {error && (
-                        <div
-                            style={{
-                                padding: "10px",
-                                background: "#ffe3e3",
-                                color: "#e03131",
-                                borderRadius: "6px",
-                                marginBottom: "16px",
-                                fontSize: "14px",
-                            }}
-                        >
-                            {error}
-                        </div>
-                    )}
-
-                    <form onSubmit={handleLookup} style={{ display: "flex", gap: "10px" }}>
-                        <input
-                            type="text"
-                            placeholder="Enter Order ID (e.g. 3fa85f64-5717-4562-b3fc-2c963f66afa6)"
-                            value={orderId}
-                            onChange={(e) => setOrderId(e.target.value)}
-                            style={{
-                                flex: 1,
-                                padding: "10px 14px",
-                                borderRadius: "8px",
-                                border: "1px solid #ddd",
-                                fontSize: "14px",
-                            }}
-                        />
-                        <button
-                            type="submit"
-                            style={{
-                                padding: "10px 20px",
-                                background: "#ee4d2d",
-                                color: "white",
-                                border: "none",
-                                borderRadius: "8px",
-                                cursor: "pointer",
-                                fontWeight: "600",
-                            }}
-                        >
-                            Track Order
-                        </button>
-                    </form>
-
+                {error && (
                     <div
                         style={{
-                            marginTop: "24px",
-                            padding: "16px",
-                            background: "#f8f9fa",
-                            borderRadius: "8px",
-                            fontSize: "13px",
-                            color: "#666",
+                            padding: "12px",
+                            background: "#ffe3e3",
+                            color: "#e03131",
+                            borderRadius: "6px",
+                            marginBottom: "16px",
                         }}
                     >
-                        <strong>Note:</strong> The current backend OrderService only supports fetching a single
-                        order by ID (<code>/api/Orders/&#123;id&#125;</code>). A full order history list endpoint is not
-                        available in the backend, so you can look up individual orders by their ID here.
+                        {error}
                     </div>
+                )}
 
-                    <div style={{ marginTop: "20px", textAlign: "center" }}>
+                <div className="tabs">
+                    {STATUS_TABS.map((tab) => (
+                        <button
+                            key={tab.key}
+                            className={`tab ${activeTab === tab.key ? "active" : ""}`}
+                            onClick={() => setActiveTab(tab.key)}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
+
+                {loading ? (
+                    <div style={{ textAlign: "center", padding: "60px 0", color: "#666" }}>
+                        Loading orders...
+                    </div>
+                ) : filteredOrders.length === 0 ? (
+                    <div
+                        style={{
+                            textAlign: "center",
+                            padding: "60px 20px",
+                            background: "white",
+                            borderRadius: "12px",
+                        }}
+                    >
+                        <h2 style={{ color: "#666", marginBottom: "8px" }}>No orders found</h2>
+                        <p style={{ color: "#999", marginBottom: "24px" }}>
+                            {activeTab === "ALL"
+                                ? "You haven't placed any orders yet."
+                                : `No orders with status "${activeTab}".`}
+                        </p>
                         <Link
                             to="/"
                             style={{
-                                color: "#ee4d2d",
+                                padding: "12px 24px",
+                                background: "#ee4d2d",
+                                color: "white",
+                                borderRadius: "8px",
                                 textDecoration: "none",
-                                fontWeight: "600",
-                                fontSize: "14px",
+                                fontWeight: "bold",
                             }}
                         >
-                            ← Continue Shopping
+                            Start Shopping
                         </Link>
                     </div>
-                </div>
+                ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                        {filteredOrders.map((order) => (
+                            <div
+                                key={order.id}
+                                onClick={() => navigate(`/orders/${order.id}`)}
+                                style={{
+                                    background: "white",
+                                    borderRadius: "12px",
+                                    padding: "20px",
+                                    boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
+                                    cursor: "pointer",
+                                    transition: "all 0.2s",
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.1)";
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.boxShadow = "0 2px 10px rgba(0,0,0,0.06)";
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        marginBottom: "12px",
+                                        flexWrap: "wrap",
+                                        gap: "8px",
+                                    }}
+                                >
+                                    <div>
+                                        <span style={{ fontWeight: "700", color: "#333", fontSize: "15px" }}>
+                                            Order #{order.id.substring(0, 8)}...
+                                        </span>
+                                        <span style={{ marginLeft: "12px", fontSize: "13px", color: "#888" }}>
+                                            {formatDate(order.id)}
+                                        </span>
+                                    </div>
+                                    <OrderStatusBadge status={order.status} />
+                                </div>
+
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        flexWrap: "wrap",
+                                        gap: "12px",
+                                    }}
+                                >
+                                    <div style={{ display: "flex", gap: "20px", fontSize: "14px", color: "#666" }}>
+                                        <span>
+                                            <strong>Subtotal:</strong> {order.subTotal.toLocaleString()} đ
+                                        </span>
+                                        <span>
+                                            <strong>Shipping:</strong> {order.shippingFee.toLocaleString()} đ
+                                        </span>
+                                        <span>
+                                            <strong>Payment:</strong> {order.paymentStatus}
+                                        </span>
+                                    </div>
+                                    <div style={{ color: "#ee4d2d", fontSize: "18px", fontWeight: "bold" }}>
+                                        {order.totalPrice.toLocaleString()} đ
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -15,5 +15,17 @@ namespace CartService.Infrastructure.Persistence
         }
 
         public DbSet<CartItem> CartItems { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<CartItem>(entity =>
+            {
+                entity.ToTable("CartItems");
+                entity.HasKey(x => x.Id);
+                entity.HasIndex(x => new { x.UserId, x.ProductId }).IsUnique();
+            });
+        }
     }
 }

@@ -13,5 +13,8 @@ namespace ProductService.Application.DTO
         public decimal Price { get; set; }
         public string CategoryName { get; set; }
         public string ImageUrl { get; set; }
+        public Guid SellerId { get; set; }
+        public Guid BrandId { get; set; }
+        public string BrandName { get; set; }
     }
 }

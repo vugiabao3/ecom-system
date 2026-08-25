@@ -7,6 +7,8 @@ interface AuthContextType {
     token: string | null;
     isAuthenticated: boolean;
     isAdmin: boolean;
+    isSeller: boolean;
+    isShipper: boolean;
     login: (accessToken: string, refreshToken?: string | null) => void;
     logout: () => Promise<void>;
     refreshAuthUser: () => void;
@@ -51,6 +53,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const isAuthenticated = !!token && !!user;
     const isAdmin = user?.role?.toLowerCase() === "admin";
+    const isSeller = user?.role?.toLowerCase() === "seller";
+    const isShipper = user?.role?.toLowerCase() === "shipper";
 
     return (
         <AuthContext.Provider
@@ -59,6 +63,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 token,
                 isAuthenticated,
                 isAdmin,
+                isSeller,
+                isShipper,
                 login,
                 logout,
                 refreshAuthUser,

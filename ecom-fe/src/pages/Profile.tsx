@@ -16,8 +16,13 @@ import { Link } from "react-router-dom";
 import "../styles/profile.css";
 
 export default function Profile() {
-    const { user, logout } = useAuth();
+    const { user, logout, isShipper } = useAuth();
     const [activeTab, setActiveTab] = useState<"profile" | "addresses" | "activity" | "devices">("profile");
+
+    const [currentAddress, setCurrentAddress] = useState("");
+    const [currentLocation, setCurrentLocation] = useState("");
+    const [savingLocation, setSavingLocation] = useState(false);
+    const [locationMessage, setLocationMessage] = useState<string | null>(null);
 
     // Profile state
     const [fullName, setFullName] = useState("");
@@ -87,9 +92,25 @@ export default function Profile() {
         }
     }, [user?.id]);
 
+    const loadLocationData = useCallback(async () => {
+        if (!user?.id || !isShipper) return;
+        try {
+            const res = await getUserById(user.id);
+            if (res.data) {
+                setCurrentAddress(res.data.currentAddress || "");
+                setCurrentLocation(res.data.currentLocation || "");
+            }
+        } catch {
+            // Ignore
+        }
+    }, [user?.id, isShipper]);
+
     useEffect(() => {
         loadUserData();
-    }, [loadUserData]);
+        if (isShipper) {
+            loadLocationData();
+        }
+    }, [loadUserData, loadLocationData, isShipper]);
 
     useEffect(() => {
         if (activeTab === "addresses") loadAddresses();
@@ -106,6 +127,24 @@ export default function Profile() {
             setProfileMessage("Profile updated successfully!");
         } catch {
             setProfileMessage("Failed to update profile.");
+        }
+    };
+
+    const handleUpdateLocation = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!user?.id) return;
+        setLocationMessage(null);
+        setSavingLocation(true);
+        try {
+            await updateUser(user.id, {
+                currentAddress,
+                currentLocation,
+            });
+            setLocationMessage("Delivery location updated successfully!");
+        } catch {
+            setLocationMessage("Failed to update location.");
+        } finally {
+            setSavingLocation(false);
         }
     };
 
@@ -257,6 +296,53 @@ export default function Profile() {
                                 {loadingProfile ? "Saving..." : "Save Changes"}
                             </button>
                         </form>
+
+                        {isShipper && (
+                            <hr style={{ border: "none", borderTop: "1px solid #eee", margin: "24px 0" }} />
+                        )}
+
+                        {isShipper && (
+                            <div>
+                                <h3 style={{ marginBottom: "16px", color: "#333" }}>🚚 Delivery Location</h3>
+                                {locationMessage && (
+                                    <div
+                                        style={{
+                                            padding: "10px",
+                                            background: "#e6fcf5",
+                                            color: "#0ca678",
+                                            borderRadius: "6px",
+                                            marginBottom: "16px",
+                                            fontSize: "14px",
+                                        }}
+                                    >
+                                        {locationMessage}
+                                    </div>
+                                )}
+                                <form onSubmit={handleUpdateLocation}>
+                                    <div className="profile-form-group">
+                                        <label>Current Address</label>
+                                        <input
+                                            type="text"
+                                            value={currentAddress}
+                                            onChange={(e) => setCurrentAddress(e.target.value)}
+                                            placeholder="Enter your current delivery address"
+                                        />
+                                    </div>
+                                    <div className="profile-form-group">
+                                        <label>Current Location (City/Area)</label>
+                                        <input
+                                            type="text"
+                                            value={currentLocation}
+                                            onChange={(e) => setCurrentLocation(e.target.value)}
+                                            placeholder="e.g. District 1, Ho Chi Minh City"
+                                        />
+                                    </div>
+                                    <button type="submit" className="profile-btn" disabled={savingLocation}>
+                                        {savingLocation ? "Saving..." : "Update Delivery Location"}
+                                    </button>
+                                </form>
+                            </div>
+                        )}
                     </div>
                 )}
 

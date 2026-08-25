@@ -19,4 +19,8 @@ public class CreatePromotionCommand : IRequest<CreatePromotionResponse>
     public DateTime EndDate { get; set; }
 
     public int Quantity { get; set; }
+
+    public Guid SellerId { get; set; }
+
+    public Guid? BrandId { get; set; }
 }

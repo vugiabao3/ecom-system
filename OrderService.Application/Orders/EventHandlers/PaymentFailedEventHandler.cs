@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 using OrderService.Application.Interfaces;
 using OrderService.Application.Events;
+using OrderService.Domain.Entities;
+using EcomSystem.Contracts.Enums;
 
 namespace OrderService.Application.Orders.EventHandlers
 {
@@ -18,15 +20,22 @@ namespace OrderService.Application.Orders.EventHandlers
             _repo = repo;
         }
 
-        public async Task Handle(PaymentFailedEvent @event)
+        public async Task Handle(OrderService.Application.Events.PaymentFailedEvent @event)
         {
-            // 🔥 tìm order
             var order = await _repo.GetByIdAsync(@event.OrderId);
 
             if (order == null) return;
 
-            // 🔥 update trạng thái
-            order.Status = "CANCELLED";    
+            order.Status = OrderStatus.Cancelled;
+            order.PaymentStatus = PaymentStatus.Failed;
+            order.UpdatedAt = DateTime.UtcNow;
+
+            order.StatusHistory.Add(new OrderStatusHistory
+            {
+                OrderId = order.Id,
+                Status = OrderStatus.Cancelled.ToString(),
+                Note = "Payment failed"
+            });
 
             _repo.Update(order);
             await _repo.SaveChangesAsync();

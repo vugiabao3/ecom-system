@@ -5,6 +5,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ShippingService.Application.Interfaces;
 using ShippingService.Application.Shipments.Commands.CreateShipment;
+using ShippingService.Application.Shipments.Commands.UpdateShipmentStatus;
+using ShippingService.Application.Shipments.Commands.AssignShipment;
+using ShippingService.Application.Shipments.Queries.GetShipmentsByShipperId;
 using ShippingService.Infrastructure.Messaging;
 using ShippingService.Infrastructure.Persistence;
 using ShippingService.Infrastructure.Repositories;
@@ -99,6 +102,9 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddScoped<IEventBus, RabbitMqEventBus>();
 
 builder.Services.AddScoped<CreateShipmentHandler>();
+builder.Services.AddScoped<UpdateShipmentStatusHandler>();
+builder.Services.AddScoped<AssignShipmentHandler>();
+builder.Services.AddScoped<GetShipmentsByShipperIdHandler>();
 
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -114,7 +120,9 @@ builder.Services.AddSingleton<ServiceTokenGenerator>(sp =>
 });
 //builder.Services.AddSingleton<ShippingCreatedConsumer>();
 builder.Services.AddHttpClient<IOrderServiceClient, OrderServiceClient>();
-builder.Services.AddSingleton<PaymentSucceededConsumer>(); builder.Services.AddScoped<IShipmentRepository, ShipmentRepository>();
+builder.Services.AddSingleton<PaymentSucceededConsumer>();
+builder.Services.AddSingleton<PaymentPendingConsumer>();
+builder.Services.AddScoped<IShipmentRepository, ShipmentRepository>();
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(CreateShipmentHandler).Assembly));
 var app = builder.Build();
@@ -122,6 +130,8 @@ var app = builder.Build();
 
 var consumer = app.Services.GetRequiredService<PaymentSucceededConsumer>();
 consumer.Start();
+var paymentPendingConsumer = app.Services.GetRequiredService<PaymentPendingConsumer>();
+paymentPendingConsumer.Start();
 
 //app.Services.GetRequiredService<ShippingCreatedConsumer>().Start();
 // Configure the HTTP request pipeline.

@@ -16,4 +16,19 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<Notification> Notifications { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.ToTable("Notifications");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Type).IsRequired();
+            entity.Property(x => x.Message).IsRequired();
+            entity.HasIndex(x => x.UserId);
+            entity.HasIndex(x => x.CreatedAt);
+        });
+    }
 }
