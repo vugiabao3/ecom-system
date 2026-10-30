@@ -167,6 +167,17 @@ services:
       - rabbitmq
       - sqlserver
     restart: always
+  
+  
+  web:
+    build:
+      context: ./ecom-fe
+      dockerfile: Dockerfile
+    container_name: ecom-web
+    ports:
+      - "5173:80"
+    restart: always
+
 
 volumes:
   sql_data:
