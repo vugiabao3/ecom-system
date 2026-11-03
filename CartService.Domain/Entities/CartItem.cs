@@ -12,6 +12,7 @@ namespace CartService.Domain.Entities
         public string UserId { get; set; }
 
         public Guid ProductId { get; set; }
+        public Guid SellerId { get; set; }
 
         public int Quantity { get; set; }
         public string ProductName { get; set; }
@@ -19,6 +20,7 @@ namespace CartService.Domain.Entities
 
         public decimal PriceSnapshot { get; set; }
         public bool IsValid { get; set; } = true; // 🔥 thêm
+        public bool IsSelected { get; set; } = true;
 
     }
 }

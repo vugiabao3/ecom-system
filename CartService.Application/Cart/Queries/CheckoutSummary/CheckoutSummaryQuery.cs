@@ -1,0 +1,2 @@
+using MediatR;
+namespace CartService.Application.Cart.Queries.CheckoutSummary { public class CheckoutSummaryQuery : IRequest<CheckoutSummaryResponse> { } public class CheckoutSummaryResponse { public string Message { get; set; } = string.Empty; } }

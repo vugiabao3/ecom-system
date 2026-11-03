@@ -1,18 +1,21 @@
 ﻿using EcomSystem.Contracts.Users;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using UserService.Application.Users.AssignRole;
 using UserService.Application.Users.BlockUser;
 using UserService.Application.Users.CreateUser;
 using UserService.Application.Users.CreateUserAddress.UserService.Application.Users.CreateUserAddress;
 using UserService.Application.Users.CreateUserDevice;
 using UserService.Application.Users.GetAllUsers;
+using UserService.Application.Users.GetMe;
 using UserService.Application.Users.GetUserActivity;
 using UserService.Application.Users.GetUserAddresses;
 using UserService.Application.Users.GetUserByEmail;
 using UserService.Application.Users.GetUserById;
-using UserService.Application.Users.GetUserProfile;
 using UserService.Application.Users.GetUserDevices;
+using UserService.Application.Users.GetUserProfile;
 using UserService.Application.Users.LogoutAllDevices;
 using UserService.Application.Users.RemoveRole;
 using UserService.Application.Users.RestoreUser;
@@ -20,7 +23,6 @@ using UserService.Application.Users.SearchUsers;
 using UserService.Application.Users.SoftDeleteUser;
 using UserService.Application.Users.UnblockUser;
 using UserService.Application.Users.UpdateUser;
-using UserService.Domain.Entities;
 
 
 
@@ -41,7 +43,7 @@ namespace UserService.Api.Controllers
         {
             var command = new CreateUserCommand
             {
-                Id = request.Id, // 🔥 BẮT BUỘC
+                Id = request.Id,
                 Email = request.Email,
                 Password = request.Password,
                 FullName = request.FullName
@@ -49,6 +51,22 @@ namespace UserService.Api.Controllers
 
             var result = await _mediator.Send(command);
 
+            return Ok(result);
+        }
+
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<IActionResult> GetMe()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                         ?? User.FindFirst("sub")?.Value
+                         ?? User.FindFirst("userId")?.Value;
+
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var id))
+                return Unauthorized();
+
+            var result = await _mediator.Send(new GetMeQuery { UserId = id });
+            if (result == null) return NotFound();
             return Ok(result);
         }
         // GET /users/{id}

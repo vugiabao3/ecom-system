@@ -52,5 +52,36 @@ namespace AuthService.Infrastructure.Email
 
             await smtp.DisconnectAsync(true);
         }
+
+        public async Task SendVerificationEmailAsync(string email, string token)
+        {
+            var message = new MimeMessage();
+
+            message.From.Add(MailboxAddress.Parse("binb95982@gmail.com"));
+            message.To.Add(MailboxAddress.Parse(email));
+            message.Subject = "Verify Email";
+
+            message.Body = new TextPart("plain")
+            {
+                Text = $"Your verification token: {token}"
+            };
+
+            using var smtp = new SmtpClient();
+
+            smtp.ServerCertificateValidationCallback = (s, c, h, e) => true;
+
+            await smtp.ConnectAsync(
+                "smtp.gmail.com",
+                587,
+                SecureSocketOptions.StartTls);
+
+            await smtp.AuthenticateAsync(
+                "binb95982@gmail.com",
+                "axze rnsv ydho vlil");
+
+            await smtp.SendAsync(message);
+
+            await smtp.DisconnectAsync(true);
+        }
     }
 }

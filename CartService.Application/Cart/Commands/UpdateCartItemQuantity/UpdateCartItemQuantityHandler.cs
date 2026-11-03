@@ -32,7 +32,7 @@ namespace CartService.Application.Cart.Commands.UpdateCartItemQuantity
             if (string.IsNullOrEmpty(userId))
                 throw new Exception("Unauthorized");
 
-            var cartItem = await _cartRepo.GetItemAsync(userId, request.ProductId);
+            var cartItem = await _cartRepo.GetItemByIdAsync(userId, request.ItemId);
 
             if (cartItem == null)
                 throw new Exception("Item not found in cart");
@@ -53,11 +53,11 @@ namespace CartService.Application.Cart.Commands.UpdateCartItemQuantity
 
             if (quantityDiff > 0)
             {
-                await _inventoryClient.ReserveStockAsync(request.ProductId, quantityDiff);
+                await _inventoryClient.ReserveStockAsync(cartItem.ProductId, quantityDiff);
             }
             else if (quantityDiff < 0)
             {
-                await _inventoryClient.ReleaseStockAsync(request.ProductId, Math.Abs(quantityDiff));
+                await _inventoryClient.ReleaseStockAsync(cartItem.ProductId, Math.Abs(quantityDiff));
             }
 
             cartItem.Quantity = request.Quantity;

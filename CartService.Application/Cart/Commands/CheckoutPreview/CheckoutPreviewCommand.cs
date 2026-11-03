@@ -1,0 +1,2 @@
+using MediatR;
+namespace CartService.Application.Cart.Commands.CheckoutPreview { public class CheckoutPreviewCommand : IRequest<CheckoutPreviewResponse> { } public class CheckoutPreviewResponse { public string Message { get; set; } = string.Empty; } }

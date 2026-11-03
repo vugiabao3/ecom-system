@@ -1,0 +1,2 @@
+using MediatR;
+namespace CartService.Application.Cart.Commands.RemoveCartDevice { public class RemoveCartDeviceCommand : IRequest<RemoveCartDeviceResponse> { public string DeviceId { get; set; } = string.Empty; } public class RemoveCartDeviceResponse { public string Message { get; set; } = string.Empty; } }

@@ -2,10 +2,13 @@
 using AuthService.Application.Login;
 using AuthService.Application.Logout;
 using AuthService.Application.Logout.AuthService.Application.Logout;
+using AuthService.Application.LogoutAll;
 using AuthService.Application.OAuth;
 using AuthService.Application.Refresh;
 using AuthService.Application.Register;
+using AuthService.Application.ResendVerification;
 using AuthService.Application.ResetPassword;
+using AuthService.Application.VerifyEmail;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -108,6 +111,37 @@ namespace AuthService.Api.Controllers
                 Email = email,
                 Role = role
             });
+        }
+
+        [HttpPost("verify-email")]
+        [AllowAnonymous]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        [HttpPost("resend-verification")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResendVerification([FromBody] ResendVerificationCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        [HttpPost("logout-all")]
+        [Authorize]
+        public async Task<IActionResult> LogoutAll()
+        {
+            var email =
+                User.FindFirstValue(ClaimTypes.Email)
+                ?? User.FindFirstValue(JwtRegisteredClaimNames.Email);
+
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized();
+
+            var result = await _mediator.Send(new LogoutAllCommand { Email = email });
+            return Ok(result);
         }
 
     }

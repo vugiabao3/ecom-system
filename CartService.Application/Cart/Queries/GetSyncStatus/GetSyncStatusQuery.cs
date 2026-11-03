@@ -1,0 +1,2 @@
+using MediatR;
+namespace CartService.Application.Cart.Queries.GetSyncStatus { public class GetSyncStatusQuery : IRequest<GetSyncStatusResponse> { } public class GetSyncStatusResponse { public string Status { get; set; } = "synced"; } }

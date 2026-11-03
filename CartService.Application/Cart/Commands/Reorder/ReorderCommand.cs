@@ -1,0 +1,2 @@
+using MediatR;
+namespace CartService.Application.Cart.Commands.Reorder { public class ReorderCommand : IRequest<ReorderResponse> { public Guid OrderId { get; set; } } public class ReorderResponse { public string Message { get; set; } = string.Empty; } }

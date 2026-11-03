@@ -5,6 +5,8 @@ using NotificationService.Infrastructure.Messaging;
 using NotificationService.Infrastructure.Services;
 using NotificationService.Domain.Interfaces;
 using NotificationService.Infrastructure.Repositories;
+using NotificationService.Api.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,6 +40,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddSignalR();
 
 // register repository
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();

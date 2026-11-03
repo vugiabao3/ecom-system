@@ -1,0 +1,2 @@
+using MediatR;
+namespace CartService.Application.Cart.Commands.SyncCart { public class SyncCartCommand : IRequest<SyncCartResponse> { } public class SyncCartResponse { public string Message { get; set; } = string.Empty; } }

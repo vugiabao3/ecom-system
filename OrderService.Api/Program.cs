@@ -4,9 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OrderService.Application.Interfaces;
+using OrderService.Application.Orders.Commands.Checkout;
 using OrderService.Application.Orders.Commands.CreateOrder;
 using OrderService.Application.Orders.Commands.CancelOrder;
 using OrderService.Application.Orders.Commands.UpdateOrderStatus;
+using OrderService.Application.Orders.Queries.PreviewOrder;
+using OrderService.Application.Orders.Queries.ValidateOrder;
+using OrderService.Application.Orders.Queries.CalculateOrder;
+using OrderService.Application.Orders.Queries.GetCheckoutSession;
 using OrderService.Application.Orders.EventHandlers;
 using OrderService.Infrastructure.Messaging;
 using OrderService.Infrastructure.Persistence;
@@ -88,6 +93,11 @@ builder.Services.AddScoped<ServiceTokenGenerator>();
 builder.Services.AddSingleton<IEventBus, RabbitMQEventBus>();
 
 builder.Services.AddHttpClient<IPromotionClient, PromotionClient>();
+builder.Services.AddHttpClient<IInventoryServiceClient, InventoryServiceClient>();
+builder.Services.AddHttpClient<IShippingServiceClient, ShippingServiceClient>();
+// 🔥 5. Repository
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<ICheckoutSessionRepository, CheckoutSessionRepository>();
 // 🔥 9. Authentication (JWT)
 
 builder.Services.AddAuthentication(options =>

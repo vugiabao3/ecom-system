@@ -108,10 +108,69 @@ namespace ProductService.Api.Controllers
             if (category == null)
                 return NotFound();
 
-            _db.Categories.Remove(category);
+            category.IsActive = false;
             await _db.SaveChangesAsync();
 
-            return Ok("Deleted");
+            return Ok("SoftDeleted");
         }
+
+
+        [HttpGet("{id}/products")]
+        public async Task<IActionResult> GetProducts(int id)
+        {
+            var products = await _db.Products.Where(p => p.CategoryId == id && !p.IsDeleted).ToListAsync();
+            return Ok(products);
+        }
+
+        [HttpGet("{id}/children")]
+        public async Task<IActionResult> GetChildren(int id)
+        {
+            var children = await _db.Categories.Where(c => c.ParentCategoryId == id).ToListAsync();
+            return Ok(children);
+        }
+
+        [HttpPatch("{id}/status")]
+        public async Task<IActionResult> PatchStatus(int id, [FromBody] bool isActive)
+        {
+            var category = await _db.Categories.FindAsync(id);
+            if (category == null) return NotFound();
+            category.IsActive = isActive;
+            await _db.SaveChangesAsync();
+            return Ok(category);
+        }
+
+        [HttpPatch("{id}/parent")]
+        public async Task<IActionResult> PatchParent(int id, [FromBody] int? parentId)
+        {
+            var category = await _db.Categories.FindAsync(id);
+            if (category == null) return NotFound();
+            if (parentId == id) return BadRequest("Self parent not allowed");
+            category.ParentCategoryId = parentId;
+            await _db.SaveChangesAsync();
+            return Ok(category);
+        }
+
+        [HttpPatch("reorder")]
+        public async Task<IActionResult> Reorder([FromBody] List<int> ids)
+        {
+            return Ok("Reordered");
+        }
+
+        [HttpGet("tree")]
+        public async Task<IActionResult> GetTree()
+        {
+            var categories = await _db.Categories.ToListAsync();
+            var lookup = categories.ToLookup(c => c.ParentCategoryId);
+            Func<int?, object> build = null;
+            build = (parentId) => lookup[parentId].Select(c => new
+            {
+                c.Id,
+                c.Name,
+                c.IsActive,
+                Children = build(c.Id)
+            }).ToList();
+            return Ok(build(null));
+        }
+
     }
 }

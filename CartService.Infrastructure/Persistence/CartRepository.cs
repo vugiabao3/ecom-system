@@ -34,6 +34,12 @@ namespace CartService.Infrastructure.Persistence
                 .FirstOrDefaultAsync(x => x.UserId == userId && x.ProductId == productId);
         }
 
+        public async Task<CartItem> GetItemByIdAsync(string userId, Guid itemId)
+        {
+            return await _context.CartItems
+                .FirstOrDefaultAsync(x => x.UserId == userId && x.Id == itemId);
+        }
+
         public async Task UpdateAsync(CartItem item)
         {
             _context.CartItems.Update(item);

@@ -1,0 +1,2 @@
+using MediatR;
+namespace CartService.Application.Cart.Queries.InternalCartSummary { public class InternalCartSummaryQuery : IRequest<InternalCartSummaryResponse> { public string UserId { get; set; } = string.Empty; } public class InternalCartSummaryResponse { public string Message { get; set; } = string.Empty; } }

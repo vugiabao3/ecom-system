@@ -9,5 +9,6 @@ namespace AuthService.Application.Interfaces
     public interface IEmailService
     {
         Task SendResetPasswordEmailAsync(string email, string token);
+        Task SendVerificationEmailAsync(string email, string token);
     }
 }

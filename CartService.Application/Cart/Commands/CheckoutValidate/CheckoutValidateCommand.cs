@@ -1,0 +1,2 @@
+using MediatR;
+namespace CartService.Application.Cart.Commands.CheckoutValidate { public class CheckoutValidateCommand : IRequest<CheckoutValidateResponse> { } public class CheckoutValidateResponse { public bool IsValid { get; set; } public string Message { get; set; } = string.Empty; } }

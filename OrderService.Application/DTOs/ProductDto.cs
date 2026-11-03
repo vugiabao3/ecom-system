@@ -12,5 +12,8 @@ namespace OrderService.Application.DTOs
         public string Name { get; set; }
         public decimal Price { get; set; }
         public Guid SellerId { get; set; }
+        public string? Sku { get; set; }
+        public string? VariantName { get; set; }
+        public string? ImageUrl { get; set; }
     }
 }

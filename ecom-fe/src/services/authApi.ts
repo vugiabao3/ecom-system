@@ -58,6 +58,15 @@ export const refresh = (data: { refreshToken: string }) =>
 export const googleLogin = (data: GoogleLoginRequest) =>
     api.post<AuthResponse>("/auth/oauth/google", data);
 
+export const verifyEmail = (data: { token: string }) =>
+    api.post("/auth/verify-email", data);
+
+export const resendVerification = (data: { email: string }) =>
+    api.post("/auth/resend-verification", data);
+
+export const logoutAll = () =>
+    api.post("/auth/logout-all");
+
 export const adminSetRole = (userId: string, role: string) =>
     api.post("/api/admin/set-role", null, {
         params: { userId, role }

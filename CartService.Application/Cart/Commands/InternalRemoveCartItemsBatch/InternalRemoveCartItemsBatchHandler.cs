@@ -1,0 +1,3 @@
+﻿using CartService.Application.Interfaces;
+using MediatR;
+namespace CartService.Application.Cart.Commands.InternalRemoveCartItemsBatch { public class InternalRemoveCartItemsBatchHandler : IRequestHandler<InternalRemoveCartItemsBatchCommand, InternalRemoveCartItemsBatchResponse> { private readonly ICartRepository _repo; public InternalRemoveCartItemsBatchHandler(ICartRepository repo){_repo=repo;} public async Task<InternalRemoveCartItemsBatchResponse> Handle(InternalRemoveCartItemsBatchCommand r, CancellationToken ct){ foreach(var id in r.ItemIds){ var item = await _repo.GetItemByIdAsync(r.UserId, id); if(item!=null) await _repo.DeleteAsync(item);} await _repo.SaveChangesAsync(); return new InternalRemoveCartItemsBatchResponse{Message="Removed"}; } } }

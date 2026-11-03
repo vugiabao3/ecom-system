@@ -1,0 +1,2 @@
+using MediatR;
+namespace CartService.Application.Cart.Commands.MergeCart { public class MergeCartCommand : IRequest<MergeCartResponse> { } public class MergeCartResponse { public string Message { get; set; } = string.Empty; } }

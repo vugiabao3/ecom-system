@@ -1,0 +1,53 @@
+Read `docs/AI_RULE.md` completely.
+Then read `docs/UserService.md` completely.
+
+Follow both documents strictly.
+
+Your task is to fully implement and complete `UserService` Backend and Frontend according to the requirements.
+
+**Important – Premium UI/UX Design:**
+
+Significantly improve the entire Frontend interface. The design must be modern, beautiful, professional, polished, and comparable to or better than Shopee in visual quality and user experience, while maintaining a unique EcomSystem brand identity.
+
+Apply this standard consistently to every screen, page, component, form, dashboard, and user interaction within the service. Do not make superficial CSS-only changes. Prioritize excellent layouts, typography, colors, spacing, responsive design, intuitive interactions, smooth transitions, and visual consistency. Do not copy Shopee's branding or interface.
+
+**Mandatory Implementation and Verification:**
+
+1. Inspect the existing source code before making changes.
+2. Preserve all existing correct implementations and functionality.
+3. Do not unnecessarily delete or rewrite existing files.
+4. Implement all required Backend APIs, business logic, validation, authorization, database operations, and Frontend functionality according to the documentation.
+5. Ensure Backend and Frontend are fully integrated. Do not leave mock data, placeholder buttons, non-functional forms, or unfinished screens.
+6. Build the Backend and Frontend and fix all errors.
+7. Run relevant API tests and verify the actual functionality.
+8. Run `docker compose up --build` from the project root to rebuild and start the complete system with the latest changes.
+9. Check Docker Compose logs, container status, Backend APIs, Frontend accessibility, and integration between services. Fix any issues caused by your changes.
+10. Open and inspect the actual running Frontend interface. Evaluate the visual quality and user experience of every UserService screen. If the interface still looks basic, inconsistent, unfinished, or unprofessional, continue improving the design and functionality.
+11. After every significant Frontend modification, rebuild and verify the application again. Repeat this process until the actual running interface reaches a polished, professional, production-quality standard.
+12. Do not stop just because the code compiles. A successful build does not mean the UI is finished.
+
+**Important Docker and Data Safety Rules:**
+
+- Use `docker compose up --build` to rebuild and run the system.
+- Never run `docker compose down -v`.
+- Never delete Docker volumes, databases, or existing user data.
+- Do not unnecessarily rebuild or modify unrelated services.
+- If another service fails for an unrelated reason, identify and report the actual cause instead of making unjustified changes.
+
+**Definition of Done:**
+
+Do not finish until:
+- All required UserService Backend functionality is implemented.
+- The Frontend is fully functional and visually polished.
+- Backend and Frontend builds succeed.
+- Relevant API tests pass.
+- `docker compose up --build` has been executed and the system has been verified.
+- The actual running UI has been inspected and improved until it meets the required premium design standard.
+
+Do not claim that a test, build, API, Docker container, or UI verification succeeded unless you actually performed that verification.
+
+At the end, provide a clear report of implemented features, modified files, test results, Docker status, remaining issues, and any requirements that could not be completed.
+
+**Do not stop at analysis or planning. Do not stop when the interface is merely functional. Continue implementing, testing, inspecting, and refining until the required quality is achieved.**
+
+Start now.

@@ -33,16 +33,29 @@ namespace CartService.Application.Cart.Commands.AddToCart
         if (string.IsNullOrEmpty(userId))
             throw new Exception("Unauthorized");
 
+        if (request.Quantity <= 0)
+            throw new Exception("Invalid quantity");
+
         var product = await _productClient.GetProductById(request.ProductId);
 
         if (product == null)
             throw new Exception("Product not found");
+
+        var existing = await _cartRepo.GetItemAsync(userId, product.Id);
+        if (existing != null)
+        {
+            existing.Quantity += request.Quantity;
+            _cartRepo.Update(existing);
+            await _cartRepo.SaveChangesAsync();
+            return new AddToCartResponse { Message = "Updated cart" };
+        }
 
         var cartItem = new CartItem
             {
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 ProductId = product.Id,
+                SellerId = product.SellerId,
                 ProductName = product.Name,
                 Quantity = request.Quantity,
                 PriceSnapshot = product.Price

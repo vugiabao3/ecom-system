@@ -24,12 +24,11 @@ export default function Profile() {
     const [savingLocation, setSavingLocation] = useState(false);
     const [locationMessage, setLocationMessage] = useState<string | null>(null);
 
-    // Profile state
     const [fullName, setFullName] = useState("");
+    const [phone, setPhone] = useState("");
     const [loadingProfile, setLoadingProfile] = useState(false);
     const [profileMessage, setProfileMessage] = useState<string | null>(null);
 
-    // Addresses state
     const [addresses, setAddresses] = useState<UserAddressDto[]>([]);
     const [newAddress, setNewAddress] = useState<CreateAddressRequest>({
         fullName: "",
@@ -41,10 +40,7 @@ export default function Profile() {
     });
     const [addingAddress, setAddingAddress] = useState(false);
 
-    // Activity state
     const [activities, setActivities] = useState<any[]>([]);
-
-    // Devices state
     const [devices, setDevices] = useState<any[]>([]);
 
     const loadUserData = useCallback(async () => {
@@ -54,9 +50,9 @@ export default function Profile() {
             const res = await getUserById(user.id);
             if (res.data) {
                 setFullName(res.data.fullName || "");
+                setPhone(res.data.phone || "");
             }
         } catch {
-            // Ignore error
         } finally {
             setLoadingProfile(false);
         }
@@ -66,7 +62,7 @@ export default function Profile() {
         if (!user?.id) return;
         try {
             const res = await getUserAddresses(user.id);
-            setAddresses(res.data?.addresses || []);
+            setAddresses(Array.isArray(res.data?.addresses) ? res.data.addresses : Array.isArray(res.data) ? res.data : []);
         } catch {
             setAddresses([]);
         }
@@ -76,7 +72,7 @@ export default function Profile() {
         if (!user?.id) return;
         try {
             const res = await getUserActivity(user.id);
-            setActivities(res.data || []);
+            setActivities(Array.isArray(res.data) ? res.data : []);
         } catch {
             setActivities([]);
         }
@@ -86,7 +82,7 @@ export default function Profile() {
         if (!user?.id) return;
         try {
             const res = await getUserDevices(user.id);
-            setDevices(res.data || []);
+            setDevices(Array.isArray(res.data) ? res.data : []);
         } catch {
             setDevices([]);
         }
@@ -101,7 +97,6 @@ export default function Profile() {
                 setCurrentLocation(res.data.currentLocation || "");
             }
         } catch {
-            // Ignore
         }
     }, [user?.id, isShipper]);
 
@@ -123,8 +118,9 @@ export default function Profile() {
         if (!user?.id) return;
         setProfileMessage(null);
         try {
-            await updateUser(user.id, { fullName });
+            await updateUser(user.id, { fullName, phone });
             setProfileMessage("Profile updated successfully!");
+            loadUserData();
         } catch {
             setProfileMessage("Failed to update profile.");
         }
@@ -184,327 +180,300 @@ export default function Profile() {
     };
 
     return (
-        <div>
+        <div style={{ background: "#f5f5f5", minHeight: "100vh" }}>
             <Navbar />
-            <div className="profile-page">
-                <div className="profile-header">
-                    <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                        <div className="profile-avatar-circle">
+            <div className="profile-page-premium">
+                <div className="profile-hero">
+                    <div className="profile-hero-content">
+                        <div className="profile-avatar-large">
                             {(fullName || user?.email || "U").charAt(0).toUpperCase()}
                         </div>
-                        <div>
-                            <h2 style={{ margin: "0 0 4px", fontSize: "20px" }}>{fullName || "User Profile"}</h2>
-                            <p style={{ margin: 0, color: "#666", fontSize: "14px" }}>{user?.email}</p>
-                            <span
-                                style={{
-                                    display: "inline-block",
-                                    marginTop: "4px",
-                                    fontSize: "12px",
-                                    background: "#e7f5ff",
-                                    color: "#1971c2",
-                                    padding: "2px 8px",
-                                    borderRadius: "4px",
-                                    fontWeight: "600",
-                                }}
-                            >
-                                Role: {user?.role || "User"}
-                            </span>
+                        <div className="profile-hero-info">
+                            <h1 className="profile-hero-name">{fullName || "User Profile"}</h1>
+                            <p className="profile-hero-email">{user?.email}</p>
+                            <div className="profile-hero-badges">
+                                <span className="profile-badge">Role: {user?.role || "User"}</span>
+                                <span className="profile-badge">Active Account</span>
+                            </div>
                         </div>
                     </div>
-
-                    <Link
-                        to="/change-password"
-                        style={{
-                            padding: "8px 16px",
-                            border: "1px solid #ddd",
-                            borderRadius: "6px",
-                            color: "#444",
-                            textDecoration: "none",
-                            fontSize: "14px",
-                            fontWeight: "600",
-                        }}
-                    >
+                    <Link to="/change-password" className="profile-action-btn">
                         🔒 Change Password
                     </Link>
                 </div>
 
-                <div className="profile-tabs">
-                    <button
-                        className={`profile-tab-btn ${activeTab === "profile" ? "active" : ""}`}
-                        onClick={() => setActiveTab("profile")}
-                    >
-                        Account Info
-                    </button>
-                    <button
-                        className={`profile-tab-btn ${activeTab === "addresses" ? "active" : ""}`}
-                        onClick={() => setActiveTab("addresses")}
-                    >
-                        Saved Addresses
-                    </button>
-                    <button
-                        className={`profile-tab-btn ${activeTab === "devices" ? "active" : ""}`}
-                        onClick={() => setActiveTab("devices")}
-                    >
-                        Login Devices
-                    </button>
-                    <button
-                        className={`profile-tab-btn ${activeTab === "activity" ? "active" : ""}`}
-                        onClick={() => setActiveTab("activity")}
-                    >
-                        Recent Activity
-                    </button>
-                </div>
+                <div className="profile-layout">
+                    <div className="profile-sidebar">
+                        <button
+                            className={`profile-sidebar-btn ${activeTab === "profile" ? "active" : ""}`}
+                            onClick={() => setActiveTab("profile")}
+                        >
+                            👤 My Profile
+                        </button>
+                        <button
+                            className={`profile-sidebar-btn ${activeTab === "addresses" ? "active" : ""}`}
+                            onClick={() => setActiveTab("addresses")}
+                        >
+                            📍 Addresses
+                        </button>
+                        <button
+                            className={`profile-sidebar-btn ${activeTab === "devices" ? "active" : ""}`}
+                            onClick={() => setActiveTab("devices")}
+                        >
+                            📱 Devices & Security
+                        </button>
+                        <button
+                            className={`profile-sidebar-btn ${activeTab === "activity" ? "active" : ""}`}
+                            onClick={() => setActiveTab("activity")}
+                        >
+                            📊 Account Activity
+                        </button>
+                    </div>
 
-                {/* TAB 1: PROFILE INFO */}
-                {activeTab === "profile" && (
-                    <div className="profile-card">
-                        <h3 style={{ marginBottom: "16px", color: "#333" }}>Personal Details</h3>
+                    <div className="profile-main">
+                        {activeTab === "profile" && (
+                            <div className="profile-card-premium">
+                                <div className="profile-card-header">
+                                    <h2 className="profile-card-title">Personal Information</h2>
+                                    <p className="profile-card-subtitle">Manage your personal details</p>
+                                </div>
 
-                        {profileMessage && (
-                            <div
-                                style={{
-                                    padding: "10px",
-                                    background: "#e6fcf5",
-                                    color: "#0ca678",
-                                    borderRadius: "6px",
-                                    marginBottom: "16px",
-                                    fontSize: "14px",
-                                }}
-                            >
-                                {profileMessage}
-                            </div>
-                        )}
-
-                        <form onSubmit={handleUpdateProfile}>
-                            <div className="profile-form-group">
-                                <label>Email Address</label>
-                                <input type="email" value={user?.email || ""} disabled style={{ background: "#f8f9fa" }} />
-                            </div>
-
-                            <div className="profile-form-group">
-                                <label>Full Name</label>
-                                <input
-                                    type="text"
-                                    value={fullName}
-                                    onChange={(e) => setFullName(e.target.value)}
-                                    placeholder="Enter your full name"
-                                    required
-                                />
-                            </div>
-
-                            <button type="submit" className="profile-btn" disabled={loadingProfile}>
-                                {loadingProfile ? "Saving..." : "Save Changes"}
-                            </button>
-                        </form>
-
-                        {isShipper && (
-                            <hr style={{ border: "none", borderTop: "1px solid #eee", margin: "24px 0" }} />
-                        )}
-
-                        {isShipper && (
-                            <div>
-                                <h3 style={{ marginBottom: "16px", color: "#333" }}>🚚 Delivery Location</h3>
-                                {locationMessage && (
-                                    <div
-                                        style={{
-                                            padding: "10px",
-                                            background: "#e6fcf5",
-                                            color: "#0ca678",
-                                            borderRadius: "6px",
-                                            marginBottom: "16px",
-                                            fontSize: "14px",
-                                        }}
-                                    >
-                                        {locationMessage}
+                                {profileMessage && (
+                                    <div className={`profile-alert ${profileMessage.includes('success') ? 'success' : 'error'}`}>
+                                        {profileMessage}
                                     </div>
                                 )}
-                                <form onSubmit={handleUpdateLocation}>
-                                    <div className="profile-form-group">
-                                        <label>Current Address</label>
+
+                                <form onSubmit={handleUpdateProfile} className="profile-form-premium">
+                                    <div className="profile-form-row">
+                                        <div className="profile-form-group-premium">
+                                            <label className="profile-label">Email Address</label>
+                                            <input type="email" className="profile-input-premium" value={user?.email || ""} disabled />
+                                        </div>
+                                        <div className="profile-form-group-premium">
+                                            <label className="profile-label">Full Name</label>
+                                            <input
+                                                type="text"
+                                                className="profile-input-premium"
+                                                value={fullName}
+                                                onChange={(e) => setFullName(e.target.value)}
+                                                placeholder="Enter your full name"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="profile-form-group-premium">
+                                        <label className="profile-label">Phone Number</label>
                                         <input
-                                            type="text"
-                                            value={currentAddress}
-                                            onChange={(e) => setCurrentAddress(e.target.value)}
-                                            placeholder="Enter your current delivery address"
+                                            type="tel"
+                                            className="profile-input-premium"
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
+                                            placeholder="Enter your phone number"
                                         />
                                     </div>
-                                    <div className="profile-form-group">
-                                        <label>Current Location (City/Area)</label>
+
+                                    <button type="submit" className="profile-submit-btn" disabled={loadingProfile}>
+                                        {loadingProfile ? "Saving..." : "Save Changes"}
+                                    </button>
+                                </form>
+
+                                {isShipper && (
+                                    <>
+                                        <div className="profile-divider"></div>
+                                        <div className="profile-card-header">
+                                            <h2 className="profile-card-title">🚚 Delivery Location</h2>
+                                            <p className="profile-card-subtitle">Update your current delivery location</p>
+                                        </div>
+                                        {locationMessage && (
+                                            <div className={`profile-alert ${locationMessage.includes('success') ? 'success' : 'error'}`}>
+                                                {locationMessage}
+                                            </div>
+                                        )}
+                                        <form onSubmit={handleUpdateLocation} className="profile-form-premium">
+                                            <div className="profile-form-group-premium">
+                                                <label className="profile-label">Current Address</label>
+                                                <input
+                                                    type="text"
+                                                    className="profile-input-premium"
+                                                    value={currentAddress}
+                                                    onChange={(e) => setCurrentAddress(e.target.value)}
+                                                    placeholder="Enter your current delivery address"
+                                                />
+                                            </div>
+                                            <div className="profile-form-group-premium">
+                                                <label className="profile-label">Current Location (City/Area)</label>
+                                                <input
+                                                    type="text"
+                                                    className="profile-input-premium"
+                                                    value={currentLocation}
+                                                    onChange={(e) => setCurrentLocation(e.target.value)}
+                                                    placeholder="e.g. District 1, Ho Chi Minh City"
+                                                />
+                                            </div>
+                                            <button type="submit" className="profile-submit-btn" disabled={savingLocation}>
+                                                {savingLocation ? "Saving..." : "Update Location"}
+                                            </button>
+                                        </form>
+                                    </>
+                                )}
+                            </div>
+                        )}
+
+                        {activeTab === "addresses" && (
+                            <div className="profile-card-premium">
+                                <div className="profile-card-header">
+                                    <h2 className="profile-card-title">Shipping Addresses</h2>
+                                    <p className="profile-card-subtitle">Manage your delivery addresses</p>
+                                </div>
+
+                                {!Array.isArray(addresses) || addresses.length === 0 ? (
+                                    <div className="empty-state-premium">No saved addresses yet</div>
+                                ) : (
+                                    <div className="addresses-grid">
+                                        {addresses.map((a, idx) => (
+                                            <div key={a.id || idx} className="address-card">
+                                                <div className="address-card-header">
+                                                    <strong>{a.fullName}</strong>
+                                                    <span className="address-phone">{a.phone}</span>
+                                                </div>
+                                                <p className="address-details">
+                                                    {a.addressLine}, {a.city}, {a.country} {a.postalCode}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <div className="profile-divider"></div>
+                                <div className="profile-card-header">
+                                    <h3 className="profile-card-title">Add New Address</h3>
+                                </div>
+                                <form onSubmit={handleAddAddress} className="profile-form-premium">
+                                    <div className="profile-form-row">
+                                        <div className="profile-form-group-premium">
+                                            <label className="profile-label">Recipient Name</label>
+                                            <input
+                                                className="profile-input-premium"
+                                                value={newAddress.fullName}
+                                                onChange={(e) => setNewAddress({ ...newAddress, fullName: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="profile-form-group-premium">
+                                            <label className="profile-label">Phone Number</label>
+                                            <input
+                                                className="profile-input-premium"
+                                                value={newAddress.phone}
+                                                onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="profile-form-group-premium">
+                                        <label className="profile-label">Street Address</label>
                                         <input
-                                            type="text"
-                                            value={currentLocation}
-                                            onChange={(e) => setCurrentLocation(e.target.value)}
-                                            placeholder="e.g. District 1, Ho Chi Minh City"
+                                            className="profile-input-premium"
+                                            value={newAddress.addressLine}
+                                            onChange={(e) => setNewAddress({ ...newAddress, addressLine: e.target.value })}
+                                            required
                                         />
                                     </div>
-                                    <button type="submit" className="profile-btn" disabled={savingLocation}>
-                                        {savingLocation ? "Saving..." : "Update Delivery Location"}
+                                    <div className="profile-form-row">
+                                        <div className="profile-form-group-premium">
+                                            <label className="profile-label">City</label>
+                                            <input
+                                                className="profile-input-premium"
+                                                value={newAddress.city}
+                                                onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="profile-form-group-premium">
+                                            <label className="profile-label">Country</label>
+                                            <input
+                                                className="profile-input-premium"
+                                                value={newAddress.country}
+                                                onChange={(e) => setNewAddress({ ...newAddress, country: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="profile-form-group-premium">
+                                            <label className="profile-label">Postal Code</label>
+                                            <input
+                                                className="profile-input-premium"
+                                                value={newAddress.postalCode}
+                                                onChange={(e) => setNewAddress({ ...newAddress, postalCode: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                    <button type="submit" className="profile-submit-btn" disabled={addingAddress}>
+                                        {addingAddress ? "Adding..." : "Add Address"}
                                     </button>
                                 </form>
                             </div>
                         )}
-                    </div>
-                )}
 
-                {/* TAB 2: ADDRESSES */}
-                {activeTab === "addresses" && (
-                    <div className="profile-card">
-                        <h3 style={{ marginBottom: "16px", color: "#333" }}>Shipping Addresses</h3>
-
-                        {addresses.length === 0 ? (
-                            <p style={{ color: "#888", marginBottom: "20px" }}>No saved addresses yet.</p>
-                        ) : (
-                            <div style={{ marginBottom: "28px" }}>
-                                {addresses.map((a, idx) => (
-                                    <div key={a.id || idx} className="address-item-card">
-                                        <h4 style={{ margin: "0 0 4px" }}>
-                                            {a.fullName} <span style={{ color: "#888", fontWeight: "normal" }}>({a.phone})</span>
-                                        </h4>
-                                        <p style={{ margin: 0, color: "#555", fontSize: "14px" }}>
-                                            {a.addressLine}, {a.city}, {a.country} {a.postalCode}
-                                        </p>
+                        {activeTab === "devices" && (
+                            <div className="profile-card-premium">
+                                <div className="profile-card-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <div>
+                                        <h2 className="profile-card-title">Devices & Security</h2>
+                                        <p className="profile-card-subtitle">Manage your active sessions</p>
                                     </div>
-                                ))}
+                                    <button onClick={handleLogoutAll} className="danger-btn">
+                                        Logout All Devices
+                                    </button>
+                                </div>
+                                {!Array.isArray(devices) || devices.length === 0 ? (
+                                    <div className="empty-state-premium">No registered devices</div>
+                                ) : (
+                                    <div className="activity-list">
+                                        {devices.map((d, idx) => (
+                                            <div key={d.id || idx} className="activity-item-premium">
+                                                <div>
+                                                    <div className="activity-action">{d.deviceInfo || d.deviceName || "Web Browser"}</div>
+                                                    <div className="activity-details">IP: {d.ipAddress || "Unknown"}</div>
+                                                </div>
+                                                <div className="activity-time">
+                                                    {d.loginAt ? new Date(d.loginAt).toLocaleString() : "Active"}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         )}
 
-                        <hr style={{ border: "none", borderTop: "1px solid #eee", margin: "20px 0" }} />
-
-                        <h4 style={{ marginBottom: "12px", color: "#444" }}>+ Add New Address</h4>
-                        <form onSubmit={handleAddAddress}>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                                <div className="profile-form-group">
-                                    <label>Recipient Name</label>
-                                    <input
-                                        value={newAddress.fullName}
-                                        onChange={(e) => setNewAddress({ ...newAddress, fullName: e.target.value })}
-                                        placeholder="Full Name"
-                                        required
-                                    />
+                        {activeTab === "activity" && (
+                            <div className="profile-card-premium">
+                                <div className="profile-card-header">
+                                    <h2 className="profile-card-title">Account Activity</h2>
+                                    <p className="profile-card-subtitle">Recent account activities</p>
                                 </div>
-                                <div className="profile-form-group">
-                                    <label>Phone Number</label>
-                                    <input
-                                        value={newAddress.phone}
-                                        onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
-                                        placeholder="Phone"
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="profile-form-group">
-                                <label>Street Address</label>
-                                <input
-                                    value={newAddress.addressLine}
-                                    onChange={(e) => setNewAddress({ ...newAddress, addressLine: e.target.value })}
-                                    placeholder="Street, Building, Unit"
-                                    required
-                                />
-                            </div>
-
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
-                                <div className="profile-form-group">
-                                    <label>City</label>
-                                    <input
-                                        value={newAddress.city}
-                                        onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
-                                        placeholder="City"
-                                        required
-                                    />
-                                </div>
-                                <div className="profile-form-group">
-                                    <label>Country</label>
-                                    <input
-                                        value={newAddress.country}
-                                        onChange={(e) => setNewAddress({ ...newAddress, country: e.target.value })}
-                                        placeholder="Country"
-                                        required
-                                    />
-                                </div>
-                                <div className="profile-form-group">
-                                    <label>Postal Code</label>
-                                    <input
-                                        value={newAddress.postalCode}
-                                        onChange={(e) => setNewAddress({ ...newAddress, postalCode: e.target.value })}
-                                        placeholder="Postal Code"
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            <button type="submit" className="profile-btn" disabled={addingAddress}>
-                                {addingAddress ? "Adding..." : "Add Address"}
-                            </button>
-                        </form>
-                    </div>
-                )}
-
-                {/* TAB 3: DEVICES */}
-                {activeTab === "devices" && (
-                    <div className="profile-card">
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                            <h3 style={{ margin: 0, color: "#333" }}>Registered Devices & Sessions</h3>
-                            <button
-                                onClick={handleLogoutAll}
-                                style={{
-                                    padding: "8px 14px",
-                                    background: "#e03131",
-                                    color: "white",
-                                    border: "none",
-                                    borderRadius: "6px",
-                                    fontWeight: "600",
-                                    fontSize: "13px",
-                                    cursor: "pointer",
-                                }}
-                            >
-                                🚪 Logout All Devices
-                            </button>
-                        </div>
-
-                        {devices.length === 0 ? (
-                            <p style={{ color: "#888" }}>No specific devices registered.</p>
-                        ) : (
-                            <div>
-                                {devices.map((d, idx) => (
-                                    <div key={d.id || idx} className="activity-item">
-                                        <div>
-                                            <strong>{d.deviceName || "Web Browser"}</strong>
-                                            <div style={{ fontSize: "12px", color: "#888" }}>IP: {d.ipAddress || "Unknown"}</div>
-                                        </div>
-                                        <span style={{ fontSize: "12px", color: "#666" }}>
-                                            {d.lastActive ? new Date(d.lastActive).toLocaleString() : "Active"}
-                                        </span>
+                                {!Array.isArray(activities) || activities.length === 0 ? (
+                                    <div className="empty-state-premium">No recent activity</div>
+                                ) : (
+                                    <div className="activity-list">
+                                        {activities.map((act, idx) => (
+                                            <div key={act.id || idx} className="activity-item-premium">
+                                                <div>
+                                                    <div className="activity-action">{act.action || act.activityType || "Activity"}</div>
+                                                    <div className="activity-details">{act.description || act.details || ""}</div>
+                                                </div>
+                                                <div className="activity-time">
+                                                    {act.createdAt ? new Date(act.createdAt).toLocaleString() : ""}
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
+                                )}
                             </div>
                         )}
                     </div>
-                )}
-
-                {/* TAB 4: ACTIVITY */}
-                {activeTab === "activity" && (
-                    <div className="profile-card">
-                        <h3 style={{ marginBottom: "16px", color: "#333" }}>Account Activity Log</h3>
-                        {activities.length === 0 ? (
-                            <p style={{ color: "#888" }}>No recent activity records available.</p>
-                        ) : (
-                            <div>
-                                {activities.map((act, idx) => (
-                                    <div key={act.id || idx} className="activity-item">
-                                        <div>
-                                            <p style={{ margin: "0 0 2px", fontWeight: "600" }}>{act.action || act.activityType}</p>
-                                            <span style={{ fontSize: "12px", color: "#888" }}>{act.details || "Activity performed"}</span>
-                                        </div>
-                                        <span style={{ fontSize: "12px", color: "#888" }}>
-                                            {act.createdAt ? new Date(act.createdAt).toLocaleString() : ""}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
+                </div>
             </div>
         </div>
     );

@@ -52,7 +52,7 @@ namespace PaymentService.Application.Payments.Commands.ProcessPayment
             {
                 Id = existing != null ? existing.Id : Guid.NewGuid(),
                 OrderId = request.OrderId,
-                Amount = order.TotalPrice,
+                UserId = order.UserId,
                 Status = method == PaymentMethod.COD ? PaymentStatus.Pending : PaymentStatus.Pending,
                 Method = method,
                 CreatedAt = existing != null ? existing.CreatedAt : DateTime.UtcNow

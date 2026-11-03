@@ -11,6 +11,9 @@ using ProductService.Application.Products.Commands.UpdateBrand;
 using ProductService.Application.Products.Commands.DeleteBrand;
 using ProductService.Application.Products.Queries.GetProductsBySeller;
 using ProductService.Application.Products.Commands.RestoreProduct;
+using ProductService.Application.Products.Commands.DuplicateProduct;
+using ProductService.Application.Products.Commands.PatchProduct;
+using ProductService.Application.Products.Commands.PatchProductStatus;
 using ProductService.Application.Products.Queries.SearchProduct;
 using ProductService.Application.Products.Queries.GetProductsByIds;
 using ProductService.Application.Products.Queries.GetBrandsBySeller;
@@ -63,6 +66,15 @@ namespace ProductService.Api.Controllers
             var result = await _mediator.Send(command);
             return Ok(result);
         }
+
+        [HttpPatch("{id}")]
+        [Authorize]
+        public async Task<IActionResult> PatchProduct(Guid id, PatchProductCommand command)
+        {
+            command.Id = id;
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> DeleteProduct(Guid id)
@@ -85,7 +97,58 @@ namespace ProductService.Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("seller/{sellerId}")]
+        [HttpGet("new-arrivals")]
+        public async Task<IActionResult> GetNewArrivals([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var query = new GetAllProductsQuery { Page = page, PageSize = pageSize, SortBy = "newest" };
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+        [HttpGet("best-selling")]
+        public async Task<IActionResult> GetBestSelling([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var query = new GetAllProductsQuery { Page = page, PageSize = pageSize, SortBy = "newest" };
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+        [HttpGet("{id}/related")]
+        public async Task<IActionResult> GetRelated(Guid id)
+        {
+            var product = await _mediator.Send(new GetProductDetailQuery(id));
+            if (product == null) return NotFound();
+            var query = new GetAllProductsQuery { Page = 1, PageSize = 10, SortBy = "newest" };
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+        [HttpGet("{id}/recommendations")]
+        public async Task<IActionResult> GetRecommendations(Guid id)
+        {
+            var product = await _mediator.Send(new GetProductDetailQuery(id));
+            if (product == null) return NotFound();
+            var query = new GetAllProductsQuery { Page = 1, PageSize = 10, SortBy = "newest" };
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+        [HttpPatch("{id}/status")]
+        [Authorize]
+        public async Task<IActionResult> PatchStatus(Guid id, [FromBody] PatchProductStatusCommand command)
+        {
+            command.Id = id;
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        [HttpPost("{id}/duplicate")]
+        [Authorize]
+        public async Task<IActionResult> DuplicateProduct(Guid id)
+        {
+            var result = await _mediator.Send(new DuplicateProductCommand { Id = id });
+            return Ok(result);
+        }
         [Authorize]
         public async Task<IActionResult> GetProductsBySeller(Guid sellerId)
         {

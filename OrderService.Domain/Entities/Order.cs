@@ -11,6 +11,7 @@ namespace OrderService.Domain.Entities
     {
         public Guid Id { get; set; }
         public string UserId { get; set; }
+        public string? IdempotencyKey { get; set; }
         public string Address { get; set; }
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
@@ -25,5 +26,6 @@ namespace OrderService.Domain.Entities
         public DateTime? UpdatedAt { get; set; }
         public List<OrderItem> Items { get; set; }
         public List<OrderStatusHistory> StatusHistory { get; set; }
+        public CheckoutSession CheckoutSession { get; set; }
     }
 }

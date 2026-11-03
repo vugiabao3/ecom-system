@@ -21,39 +21,51 @@ namespace OrderService.Infrastructure.Services
             _http = http;
             _httpContextAccessor = httpContextAccessor;
         }
+
+        private void ApplyAuthHeader()
+        {
+            var token = _httpContextAccessor.HttpContext?
+                .Request.Headers["Authorization"]
+                .ToString();
+            if (!string.IsNullOrEmpty(token))
+            {
+                _http.DefaultRequestHeaders.Authorization =
+                    AuthenticationHeaderValue.Parse(token);
+            }
+        }
+
         public async Task<CartDto> GetCart()
         {
-            var token = _httpContextAccessor.HttpContext?
-                .Request.Headers["Authorization"]
-                .ToString();
-
-            if (!string.IsNullOrEmpty(token))
-            {
-                _http.DefaultRequestHeaders.Authorization =
-                    AuthenticationHeaderValue.Parse(token);
-            }
-
+            ApplyAuthHeader();
             var response = await _http.GetAsync("http://cartservice:8080/api/cart");
-
             response.EnsureSuccessStatusCode();
-
             return await response.Content.ReadFromJsonAsync<CartDto>();
         }
+
+        public async Task<List<CartItemDto>> GetSelectedCart()
+        {
+            ApplyAuthHeader();
+            var response = await _http.GetAsync("http://cartservice:8080/api/cart/selected");
+            response.EnsureSuccessStatusCode();
+            var items = await response.Content.ReadFromJsonAsync<List<CartItemDto>>();
+            return items ?? new List<CartItemDto>();
+        }
+
         public async Task ClearCart()
         {
-            var token = _httpContextAccessor.HttpContext?
-                .Request.Headers["Authorization"]
-                .ToString();
-
-            if (!string.IsNullOrEmpty(token))
-            {
-                _http.DefaultRequestHeaders.Authorization =
-                    AuthenticationHeaderValue.Parse(token);
-            }
-
+            ApplyAuthHeader();
             var response = await _http.DeleteAsync("http://cartservice:8080/api/cart/clear");
-
             response.EnsureSuccessStatusCode();
+        }
+
+        public async Task ClearSelectedCart()
+        {
+            ApplyAuthHeader();
+            var response = await _http.PostAsync("http://cartservice:8080/api/cart/selected/clear", null);
+            if (!response.IsSuccessStatusCode)
+            {
+                // Best-effort: selected-clear may not exist; ignore failure.
+            }
         }
     }
 }

@@ -1,24 +1,30 @@
 import cartApiClient
 from "./cartApiClient";
 
-// ADD TO CART
 export const addToCart = (data: any) => {
     return cartApiClient.post("/api/Cart", data);
 };
 
-// GET CART
 export const getCart = () => {
     return cartApiClient.get("/api/Cart");
 };
 
-// REMOVE ITEM
-export const removeCartItem = (productId: string) => {
-    return cartApiClient.delete(`/api/Cart`, {
-        data: { productId }
-    });
+export const updateCartItem = (itemId: string, data: any) => {
+    return cartApiClient.put(`/api/Cart/items/${itemId}`, data);
 };
 
-// CLEAR CART
+export const updateCartItemQuantity = (itemId: string, quantity: number) => {
+    return cartApiClient.patch(`/api/Cart/items/${itemId}/quantity`, { quantity });
+};
+
+export const removeCartItem = (itemId: string) => {
+    return cartApiClient.delete(`/api/Cart/items/${itemId}`);
+};
+
 export const clearCart = () => {
     return cartApiClient.delete("/api/Cart/clear");
+};
+
+export const getSelectedCart = () => {
+    return cartApiClient.get<any[]>("/api/Cart/selected");
 };

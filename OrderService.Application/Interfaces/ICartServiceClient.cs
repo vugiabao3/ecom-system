@@ -9,7 +9,8 @@ namespace OrderService.Application.Interfaces
     public interface ICartServiceClient
     {
         Task<CartDto> GetCart();
+        Task<List<CartItemDto>> GetSelectedCart();
         Task ClearCart(); // 🔥 thêm dòng này
-
+        Task ClearSelectedCart();
     }
 }

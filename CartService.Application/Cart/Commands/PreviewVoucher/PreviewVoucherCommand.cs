@@ -1,0 +1,2 @@
+using MediatR;
+namespace CartService.Application.Cart.Commands.PreviewVoucher { public class PreviewVoucherCommand : IRequest<PreviewVoucherResponse> { public Guid VoucherId { get; set; } } public class PreviewVoucherResponse { public decimal Discount { get; set; } } }

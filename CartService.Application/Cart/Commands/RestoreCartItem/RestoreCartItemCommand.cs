@@ -1,0 +1,2 @@
+using MediatR;
+namespace CartService.Application.Cart.Commands.RestoreCartItem { public class RestoreCartItemCommand : IRequest<RestoreCartItemResponse> { public Guid ItemId { get; set; } } public class RestoreCartItemResponse { public string Message { get; set; } = string.Empty; } }

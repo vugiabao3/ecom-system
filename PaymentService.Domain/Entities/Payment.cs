@@ -11,6 +11,7 @@ namespace PaymentService.Domain.Entities
     {
         public Guid Id { get; set; }
         public Guid OrderId { get; set; }
+        public string UserId { get; set; } = string.Empty;
         public decimal Amount { get; set; }
         public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
         public PaymentMethod Method { get; set; } = PaymentMethod.QR;

@@ -31,25 +31,17 @@ namespace CartService.Application.Cart.Commands.RemoveItem
             var userId = _currentUser.UserId;
 
             // 🔥 1. tìm item
-            var item = await _cartRepository.GetItemAsync(userId, request.ProductId);
+            var item = await _cartRepository.GetItemByIdAsync(userId, request.ItemId);
 
             if (item == null)
                 throw new Exception("Item not found in cart");
 
-            // 🔥 2. business logic
-            if (item.Quantity > 1)
-            {
-                item.Quantity -= 1;
-                await _cartRepository.UpdateAsync(item);
-            }
-            else
-            {
-                await _cartRepository.DeleteAsync(item);
-            }
-            // trả stock lại inventory
+            await _cartRepository.DeleteAsync(item);
+
             await _inventoryService.ReleaseStockAsync(
-                request.ProductId,
-                1);
+                item.ProductId,
+                item.Quantity);
+
             return new RemoveItemResponse
             {
                 Message = "Item removed"

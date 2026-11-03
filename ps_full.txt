@@ -1,0 +1,325 @@
+﻿Read `docs/AI_RULE.md` completely.
+Then read `docs/ProductService.md` completely.
+
+Follow both documents strictly. 
+
+Your task is to fully implement, improve, and complete the entire **ProductService Backend and Frontend** according to the documentation and the existing EcomSystem architecture.
+
+# 1. Inspect the Existing Project Before Making Changes
+
+- Thoroughly inspect the existing ProductService Backend and its related Frontend code.
+- Study the existing project structure, Clean Architecture layers, entities, DTOs, Commands, Queries, Handlers, repositories, database configurations, API controllers, authentication, authorization, and service integrations.
+- Use the existing correct code as the primary reference for implementation.
+- Understand how ProductService communicates with CartService, OrderService, InventoryService, PromotionService, and other relevant microservices.
+- Follow the existing coding conventions, architecture, naming patterns, dependency injection, and API response standards.
+- Do not blindly create duplicate files, entities, endpoints, handlers, or business logic.
+
+# 2. Preserve Existing Correct Code and Functionality
+
+This requirement is extremely important.
+
+- Do NOT delete existing code or files that are already correct and functional.
+- Do NOT rewrite the entire ProductService just to implement the new requirements.
+- Reuse existing entities, DTOs, Commands, Queries, Handlers, services, repositories, and components wherever appropriate.
+- Only modify existing code when there is a clear technical or business reason.
+- Every modification must be justified, necessary, and consistent with the existing architecture.
+- Preserve existing API contracts and functionality used by other microservices and the Frontend.
+- If an API needs a new route or improved contract, maintain backward compatibility whenever reasonably possible.
+- Do not break existing database relationships, migrations, or stored data.
+- Do not replace real functionality with mock data or temporary implementations.
+
+# 3. Complete All 77 Required ProductService APIs
+
+Implement and verify all API requirements documented in `docs/ProductService.md`.
+
+The required API groups include:
+
+1. Product Management â€“ 16 APIs.
+2. Product Image Management â€“ 6 APIs.
+3. Product Variant Management â€“ 7 APIs.
+4. Category Management â€“ 11 APIs.
+5. Brand Management â€“ 9 APIs.
+6. Seller Product Management â€“ 10 APIs.
+7. Admin Product Management â€“ 10 APIs.
+8. Internal Microservice APIs â€“ 8 APIs.
+
+**Total target: 77 APIs.**
+
+Use the exact HTTP methods and endpoint routes specified in the documentation.
+
+Important implementation requirements:
+
+- Reuse existing ProductController, CategoriesController, and existing MediatR implementations where possible.
+- Complete missing APIs without duplicating existing functionality.
+- Implement proper request and response DTOs.
+- Implement validation, pagination, filtering, sorting, and searching.
+- Handle invalid IDs, duplicate records, missing resources, and invalid state transitions correctly.
+- Use consistent HTTP status codes and error responses.
+- Implement soft deletion and restoration where required.
+- Ensure product images and variants are properly associated with their parent products.
+- Implement category hierarchies and prevent invalid parent-child relationships or circular references.
+- Ensure Seller operations only affect products owned by the authenticated Seller.
+- Ensure Admin operations require appropriate Admin authorization.
+- Use JWT claims for the authenticated user's identity. Never blindly trust Seller IDs supplied by the Frontend.
+- Secure internal APIs with appropriate service-to-service authentication.
+- Ensure batch endpoints handle duplicate IDs, missing IDs, and reasonable maximum batch sizes.
+- Do not expose sensitive information in public or internal responses.
+
+If an API depends on functionality owned by another microservice, integrate with that service using the existing architecture instead of incorrectly duplicating its responsibilities.
+
+# 4. Correct Microservice Responsibilities
+
+Maintain clear ownership boundaries:
+
+- ProductService: product information, categories, brands, images, variants, SKUs, and product publishing status.
+- InventoryService: stock quantities, warehouse operations, stock reservation, and inventory updates.
+- CartService: shopping cart management.
+- OrderService: order creation, order history, and product snapshots at purchase time.
+- PromotionService: discount campaigns, coupons, and promotional calculations.
+- ShippingService: shipping and delivery operations.
+- AuthService: authentication, JWT, and account credentials.
+- UserService: user profiles and Seller information.
+- NotificationService: notifications.
+
+Important rules:
+
+- Do not let ProductService independently manage InventoryService's stock quantities.
+- Do not duplicate the database ownership of another microservice.
+- Do not make OrderService depend on the current ProductService data to reconstruct historical orders.
+- Ensure OrderService can retain product name, SKU, image, and purchase price snapshots.
+- Use existing communication patterns and integrations. Do not introduce unnecessary new infrastructure.
+- Preserve consistency between services when product status, availability, or variants change.
+
+# 5. Premium Frontend UI/UX â€“ Shopee-Level Quality with EcomSystem Identity
+
+**This is a mandatory requirement, not an optional improvement.**
+
+Completely review and significantly improve the ProductService-related Frontend interface.
+
+The overall quality should be comparable to or better than Shopee in terms of visual polish, usability, shopping experience, and professional presentation, while maintaining a unique EcomSystem brand identity.
+
+Do not copy Shopee's branding, logo, or exact interface.
+
+Apply the design standard consistently across every relevant screen, page, component, dialog, form, dashboard, and interaction.
+
+The interface should include, where applicable:
+
+**Customer Shopping Experience**
+- Modern product listing pages.
+- Attractive product cards with high-quality image presentation.
+- Product detail pages with image galleries.
+- Product variant selection.
+- Category navigation.
+- Brand filtering.
+- Search and advanced filters.
+- Price range filtering.
+- Sorting and pagination.
+- Featured products.
+- New arrivals.
+- Best-selling products.
+- Related products and recommendations.
+
+**Seller Product Management**
+- Professional Seller product dashboard.
+- Product listing and management.
+- Create and edit product forms.
+- Product image upload and preview.
+- Variant and SKU management.
+- Draft products.
+- Pending approval products.
+- Rejected products.
+- Published and unpublished products.
+- Product performance statistics.
+- Clear status indicators and useful actions.
+
+**Admin Product Management**
+- Professional Admin product management dashboard.
+- Product approval and rejection.
+- Product suspension and activation.
+- Category management.
+- Brand management.
+- Product statistics.
+- Reported product management.
+- Advanced searching and filtering.
+
+**Design Quality Requirements**
+- Consistent design system across all ProductService screens.
+- Professional typography and visual hierarchy.
+- Balanced spacing, colors, borders, shadows, and rounded corners.
+- Beautiful product cards and image galleries.
+- Responsive layouts for desktop, tablet, and mobile.
+- Smooth but subtle animations and transitions.
+- Clear loading, empty, error, and success states.
+- User-friendly forms with proper validation feedback.
+- Functional buttons, dropdowns, dialogs, tabs, filters, and navigation.
+- Avoid cluttered layouts, inconsistent components, excessive colors, and generic unfinished designs.
+
+Do not merely change CSS colors or add decorative effects. Improve the actual layouts, components, interactions, and user workflows.
+
+**Inspect the actual running Frontend interface. If any screen still looks basic, incomplete, inconsistent, or unprofessional, continue refining it until it reaches the required quality.**
+
+# 6. Backend Quality and Clean Architecture
+
+Maintain the existing Clean Architecture structure:
+
+- API
+- Application
+- Domain
+- Infrastructure
+
+Requirements:
+
+- Keep Controllers thin.
+- Put business logic in Application handlers/services.
+- Keep Domain entities and business rules appropriately separated.
+- Use DTOs rather than exposing EF Core entities directly.
+- Use proper dependency injection.
+- Use asynchronous operations where appropriate.
+- Use EF Core efficiently and avoid unnecessary database queries.
+- Use pagination for large datasets.
+- Avoid N+1 queries.
+- Use transactions where business operations require them.
+- Implement appropriate indexes and database constraints.
+- Handle concurrency and invalid state transitions where necessary.
+- Implement structured logging and exception handling.
+- Ensure authentication and authorization are correctly configured.
+
+Do not introduce unnecessary abstractions or overengineer simple operations.
+
+# 7. Database and Data Safety
+
+- Inspect the current database schema before changing entities.
+- Preserve existing data and relationships.
+- Create EF Core migrations when schema changes are necessary.
+- Verify migrations and database compatibility.
+- Never delete existing database volumes or stored data.
+- Never use destructive database operations just to make the application run.
+- Do not silently drop or recreate existing tables.
+- Ensure all changes remain compatible with the existing Docker Compose environment.
+
+# 8. Mandatory Build, Testing, and Docker Verification
+
+**Do not stop after writing code or successfully compiling the project.**
+
+You must actually execute the following verification process.
+
+### Step 1 â€“ Backend Verification
+- Build ProductService Backend.
+- Fix all compilation errors and relevant warnings.
+- Run existing Backend tests.
+- Add or update tests for new functionality.
+- Test all required API groups.
+- Verify authorization, validation, pagination, searching, filtering, and error handling.
+- Verify integration with relevant microservices.
+
+### Step 2 â€“ Frontend Verification
+- Build the Frontend.
+- Fix all compilation errors.
+- Fix runtime errors and browser console errors related to your changes.
+- Test navigation, forms, uploads, filtering, sorting, pagination, and all relevant interactions.
+- Verify that Frontend API requests use the correct Backend endpoints.
+- Ensure there are no broken buttons or placeholder features.
+
+### Step 3 â€“ Docker Compose Verification
+
+I have already configured Docker for the entire EcomSystem.
+
+**Whenever you modify C# Backend code, Frontend code, Docker-related configuration, or other build-dependent files, you MUST finish the implementation and run:**
+
+```bash
+docker compose up --build
+```
+
+Run this command from the project root containing the Docker Compose configuration.
+
+Do not skip this step.
+
+After running it:
+
+- Verify that the required containers build and start successfully.
+- Check Docker Compose service status.
+- Inspect container logs.
+- Verify ProductService API accessibility.
+- Verify Frontend accessibility.
+- Verify database connectivity.
+- Verify relevant microservice communication.
+- Test the actual application running through Docker Compose.
+- Fix errors caused by your modifications and rebuild when necessary.
+
+For ordinary runtime testing when no rebuild is needed, use:
+
+```bash
+docker compose up
+```
+
+Do not claim Docker verification succeeded merely because the command was executed. Check the actual container and application status.
+
+### Docker Data Safety
+
+- NEVER run `docker compose down -v`.
+- NEVER delete existing Docker volumes.
+- NEVER delete databases or existing application data.
+- Do not unnecessarily rebuild unrelated services.
+- Do not modify unrelated microservices unless a genuine integration issue requires it.
+- If a failure is caused by an unrelated service, environment configuration, or external dependency, identify and report the actual cause.
+
+# 9. Continuous UI Inspection and Improvement
+
+After implementing the Frontend:
+
+1. Start the complete application using Docker Compose.
+2. Open the actual running Frontend.
+3. Inspect every relevant ProductService page.
+4. Check the visual layout, responsiveness, consistency, and usability.
+5. Identify unfinished or visually weak areas.
+6. Improve the actual code.
+7. Rebuild using `docker compose up --build`.
+8. Inspect the running application again.
+9. Repeat until the interface reaches the required premium quality.
+
+Do not stop when the interface merely works.
+
+Do not stop when the first build succeeds.
+
+Do not stop when only the main product listing page looks good while other screens remain unfinished.
+
+# 10. Final Definition of Done
+
+You may only consider this task complete when:
+
+- All 77 target API contracts have been implemented or their justified exceptions have been explicitly documented.
+- Existing correct functionality has been preserved.
+- ProductService follows the existing Clean Architecture.
+- Backend and Frontend are properly integrated.
+- Relevant microservice integrations work correctly.
+- Required builds and tests have actually been executed.
+- Docker Compose has been rebuilt using `docker compose up --build`.
+- The running application has been inspected.
+- All relevant Frontend screens have been refined to the required premium design quality.
+- No known critical errors introduced by your changes remain.
+
+At the end, provide a detailed implementation report containing:
+
+1. Completed API endpoints, grouped by category.
+2. Existing APIs reused and new APIs implemented.
+3. Backend files created or modified.
+4. Frontend files created or modified.
+5. Database entities and migrations changed.
+6. Microservice integrations implemented.
+7. Backend build and test results.
+8. Frontend build and test results.
+9. Docker Compose build and runtime status.
+10. Actual UI inspection results.
+11. Remaining issues or requirements that could not be completed.
+
+Clearly distinguish between:
+- Implemented and tested.
+- Implemented but not fully tested.
+- Not implemented.
+- Blocked by external dependencies or existing project issues.
+
+Never fabricate test results, API responses, successful builds, Docker status, or UI verification.
+
+**Final instruction: Do not stop at analysis, planning, or basic implementation. Preserve the existing correct code, complete the required Backend and Frontend functionality, run the actual tests, execute `docker compose up --build`, inspect the real running application, and continue improving it until the ProductService is functionally complete and visually polished.**
+
+Start now.

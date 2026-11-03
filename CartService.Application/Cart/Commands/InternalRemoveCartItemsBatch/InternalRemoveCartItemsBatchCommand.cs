@@ -1,0 +1,2 @@
+using MediatR;
+namespace CartService.Application.Cart.Commands.InternalRemoveCartItemsBatch { public class InternalRemoveCartItemsBatchCommand : IRequest<InternalRemoveCartItemsBatchResponse> { public string UserId { get; set; } = string.Empty; public List<Guid> ItemIds { get; set; } = new(); } public class InternalRemoveCartItemsBatchResponse { public string Message { get; set; } = string.Empty; } }

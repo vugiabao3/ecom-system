@@ -1,0 +1,2 @@
+using MediatR;
+namespace CartService.Application.Cart.Commands.ApplyVoucher { public class ApplyVoucherCommand : IRequest<ApplyVoucherResponse> { public Guid VoucherId { get; set; } } public class ApplyVoucherResponse { public string Message { get; set; } = string.Empty; } }

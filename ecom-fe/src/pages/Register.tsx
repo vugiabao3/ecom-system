@@ -9,13 +9,22 @@ export default function Register() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
+            setError("Please fill in all fields.");
+            return;
+        }
         if (password !== confirmPassword) {
             setError("Passwords do not match.");
+            return;
+        }
+        if (password.length < 6) {
+            setError("Password must be at least 6 characters long.");
             return;
         }
 
@@ -37,47 +46,90 @@ export default function Register() {
     };
 
     return (
-        <div className="auth-container">
-            <h2>Create Account</h2>
-
-            {error && (
-                <div style={{ padding: "10px", background: "#ffe3e3", color: "#e03131", borderRadius: "6px", marginBottom: "12px", fontSize: "14px" }}>
-                    {error}
+        <div className="auth-page">
+            <div className="auth-hero">
+                <div className="auth-hero-content">
+                    <div className="auth-logo">EcomSystem</div>
+                    <h1 className="auth-hero-title">Join Us Today</h1>
+                    <p className="auth-hero-subtitle">
+                        Create your account to start shopping, selling, and enjoying the best deals on our marketplace.
+                    </p>
                 </div>
-            )}
+            </div>
+            <div className="auth-form-section">
+                <div className="auth-card">
+                    <div className="auth-card-header">
+                        <h2 className="auth-card-title">Create Account</h2>
+                        <p className="auth-card-subtitle">Get started with your free account</p>
+                    </div>
 
-            <form onSubmit={handleRegister}>
-                <input
-                    type="email"
-                    placeholder="Email Address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
+                    {error && <div className="auth-alert auth-alert-error">{error}</div>}
 
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
+                    <form onSubmit={handleRegister} className="auth-form">
+                        <div className="auth-form-group">
+                            <label className="auth-label">Email Address</label>
+                            <input
+                                type="email"
+                                className="auth-input"
+                                placeholder="Enter your email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                        </div>
 
-                <input
-                    type="password"
-                    placeholder="Confirm Password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                />
+                        <div className="auth-form-group">
+                            <label className="auth-label">Password</label>
+                            <div className="password-toggle">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    className="auth-input"
+                                    placeholder="Create a password (min 6 chars)"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    style={{ paddingRight: "80px" }}
+                                />
+                                <button
+                                    type="button"
+                                    className="password-toggle-btn"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? "Hide" : "Show"}
+                                </button>
+                            </div>
+                        </div>
 
-                <button type="submit" disabled={loading} style={{ background: "#ee4d2d", borderRadius: "6px", fontWeight: "bold" }}>
-                    {loading ? "Registering..." : "Register"}
-                </button>
-            </form>
+                        <div className="auth-form-group">
+                            <label className="auth-label">Confirm Password</label>
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                className="auth-input"
+                                placeholder="Confirm your password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                required
+                            />
+                        </div>
 
-            <div className="auth-links" style={{ justifyContent: "center" }}>
-                <span>Already have an account? <Link to="/login" style={{ color: "#ee4d2d" }}>Login</Link></span>
+                        <button type="submit" disabled={loading} className="auth-button auth-button-primary">
+                            {loading ? "Creating Account..." : "Create Account"}
+                        </button>
+                    </form>
+
+                    <div className="auth-divider">
+                        <span>or</span>
+                    </div>
+
+                    <div className="auth-footer-links" style={{ justifyContent: "center" }}>
+                        <span style={{ color: "#666", fontSize: "14px" }}>
+                            Already have an account?{" "}
+                            <Link to="/login" className="auth-link auth-link-accent">
+                                Sign In
+                            </Link>
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
     );

@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
-import { getProductsBySeller, createProduct, updateProduct, deleteProduct, restoreProduct, type ProductItem } from "../../services/productApi";
+import { getProductsBySeller, createProduct, updateProduct, deleteProduct, restoreProduct, patchProductStatus, type ProductItem } from "../../services/productApi";
 import { addStock } from "../../services/inventoryApi";
 import { getCategories, type CategoryDto } from "../../services/categoryApi";
 import { useAuth } from "../../context/AuthContext";
@@ -92,6 +92,15 @@ export default function SellerProducts() {
             loadData();
         } catch {
             alert("Failed to delete product.");
+        }
+    };
+
+    const handleStatusChange = async (id: string, status: string) => {
+        try {
+            await patchProductStatus(id, status);
+            loadData();
+        } catch {
+            alert("Failed to update status.");
         }
     };
 
@@ -219,6 +228,15 @@ export default function SellerProducts() {
                                                 >
                                                     + Stock
                                                 </button>
+                                                <select
+                                                    value={p.status || "Draft"}
+                                                    onChange={(e) => handleStatusChange(p.id, e.target.value)}
+                                                    style={{ padding: "4px", borderRadius: "4px", border: "1px solid #ddd", marginRight: "4px" }}
+                                                >
+                                                    <option value="Draft">Draft</option>
+                                                    <option value="Active">Active</option>
+                                                    <option value="Inactive">Inactive</option>
+                                                </select>
                                                 <button className="portal-btn danger" onClick={() => handleDeleteProduct(p.id)}>
                                                     Delete
                                                 </button>

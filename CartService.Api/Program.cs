@@ -127,12 +127,19 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-var consumer = app.Services.GetRequiredService<ProductUpdatedConsumer>();
-consumer.Start();
-var consumer2 = app.Services.GetRequiredService<ProductDeletedConsumer>();
-consumer2.Start();
-var paymentConsumer = app.Services.GetRequiredService<PaymentSucceededConsumer>();
-paymentConsumer.Start();
+try
+{
+    var consumer = app.Services.GetRequiredService<ProductUpdatedConsumer>();
+    consumer.Start();
+    var consumer2 = app.Services.GetRequiredService<ProductDeletedConsumer>();
+    consumer2.Start();
+    var paymentConsumer = app.Services.GetRequiredService<PaymentSucceededConsumer>();
+    paymentConsumer.Start();
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Consumer startup failed: {ex.Message}");
+}
 
 // Configure the HTTP request pipeline.
 

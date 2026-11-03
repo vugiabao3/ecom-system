@@ -11,6 +11,7 @@ namespace CartService.Application.Interfaces
         Task AddAsync(CartItem item);
         Task<List<CartItem>> GetByUserIdAsync(string userId);
         Task<CartItem> GetItemAsync(string userId, Guid productId);
+        Task<CartItem> GetItemByIdAsync(string userId, Guid itemId);
         Task UpdateAsync(CartItem item);
         Task DeleteAsync(CartItem item);
 

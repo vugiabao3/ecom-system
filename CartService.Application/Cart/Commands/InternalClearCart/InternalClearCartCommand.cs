@@ -1,0 +1,2 @@
+using MediatR;
+namespace CartService.Application.Cart.Commands.InternalClearCart { public class InternalClearCartCommand : IRequest<InternalClearCartResponse> { public string UserId { get; set; } = string.Empty; } public class InternalClearCartResponse { public string Message { get; set; } = string.Empty; } }

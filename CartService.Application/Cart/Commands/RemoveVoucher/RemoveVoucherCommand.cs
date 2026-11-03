@@ -1,0 +1,2 @@
+using MediatR;
+namespace CartService.Application.Cart.Commands.RemoveVoucher { public class RemoveVoucherCommand : IRequest<RemoveVoucherResponse> { public Guid VoucherId { get; set; } } public class RemoveVoucherResponse { public string Message { get; set; } = string.Empty; } }

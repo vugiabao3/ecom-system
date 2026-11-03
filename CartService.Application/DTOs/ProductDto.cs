@@ -13,5 +13,6 @@ namespace CartService.Application.DTOs
         public decimal Price { get; set; }
         // 🔥 THÊM DÒNG NÀY
         public string ImageUrl { get; set; }
+        public Guid SellerId { get; set; }
     }
 }

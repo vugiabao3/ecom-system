@@ -9,7 +9,7 @@ namespace CartService.Application.Cart.Commands.UpdateCartItemQuantity
 {
     public class UpdateCartItemQuantityCommand : IRequest<UpdateCartItemQuantityResponse>
     {
-        public Guid ProductId { get; set; }
+        public Guid ItemId { get; set; }
         public int Quantity { get; set; }
     }
 }

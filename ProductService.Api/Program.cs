@@ -56,7 +56,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 }); 
 
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductVariantRepository, ProductVariantRepository>();
 // thêm cái này
 // 
 
@@ -87,6 +87,7 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(DeleteBrandHandler).Assembly);
 });
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 // cho phép fe gọi 
 
@@ -143,4 +144,13 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+
+using (var scope = app.Services.CreateScope())
+{
+    // seeding disabled
+}
+
 app.Run();
+
+
+

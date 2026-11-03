@@ -10,6 +10,7 @@ export default function Login() {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -46,45 +47,74 @@ export default function Login() {
     };
 
     return (
-        <div className="auth-container">
-            <h2>Sign In</h2>
-
-            {error && (
-                <div style={{ padding: "10px", background: "#ffe3e3", color: "#e03131", borderRadius: "6px", marginBottom: "12px", fontSize: "14px" }}>
-                    {error}
+        <div className="auth-page">
+            <div className="auth-hero">
+                <div className="auth-hero-content">
+                    <div className="auth-logo">EcomSystem</div>
+                    <h1 className="auth-hero-title">Welcome Back</h1>
+                    <p className="auth-hero-subtitle">
+                        Sign in to access your account, track orders, and shop the best deals on our marketplace.
+                    </p>
                 </div>
-            )}
+            </div>
+            <div className="auth-form-section">
+                <div className="auth-card">
+                    <div className="auth-card-header">
+                        <h2 className="auth-card-title">Sign In</h2>
+                        <p className="auth-card-subtitle">Enter your credentials to continue</p>
+                    </div>
 
-            <form onSubmit={handleLogin}>
-                <input
-                    type="email"
-                    placeholder="Email Address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
+                    {error && <div className="auth-alert auth-alert-error">{error}</div>}
 
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
+                    <form onSubmit={handleLogin} className="auth-form">
+                        <div className="auth-form-group">
+                            <label className="auth-label">Email Address</label>
+                            <input
+                                type="email"
+                                className="auth-input"
+                                placeholder="Enter your email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                        </div>
 
-                <button type="submit" disabled={loading} style={{ background: "#ee4d2d", borderRadius: "6px", fontWeight: "bold" }}>
-                    {loading ? "Signing in..." : "Login"}
-                </button>
-            </form>
+                        <div className="auth-form-group">
+                            <label className="auth-label">Password</label>
+                            <div className="password-toggle">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    className="auth-input"
+                                    placeholder="Enter your password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    style={{ paddingRight: "80px" }}
+                                />
+                                <button
+                                    type="button"
+                                    className="password-toggle-btn"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? "Hide" : "Show"}
+                                </button>
+                            </div>
+                        </div>
 
-            <div className="auth-links">
-                <Link to="/register" style={{ color: "#ee4d2d" }}>
-                    Create account
-                </Link>
+                        <button type="submit" disabled={loading} className="auth-button auth-button-primary">
+                            {loading ? "Signing in..." : "Sign In"}
+                        </button>
+                    </form>
 
-                <Link to="/forgot-password" style={{ color: "#666" }}>
-                    Forgot Password?
-                </Link>
+                    <div className="auth-divider">
+                        <span>or</span>
+                    </div>
+
+                    <div className="auth-footer-links">
+                        <Link to="/register" className="auth-link auth-link-accent">Create Account</Link>
+                        <Link to="/forgot-password" className="auth-link">Forgot Password?</Link>
+                    </div>
+                </div>
             </div>
         </div>
     );

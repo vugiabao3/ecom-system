@@ -14,6 +14,8 @@ namespace OrderService.Infrastructure.Persistence
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
+        public DbSet<CheckoutSession> CheckoutSessions { get; set; }
+        public DbSet<CheckoutSessionItem> CheckoutSessionItems { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) { }
@@ -58,6 +60,36 @@ namespace OrderService.Infrastructure.Persistence
                       .HasForeignKey(x => x.OrderId)
                       .OnDelete(DeleteBehavior.Cascade);
                 entity.HasIndex(x => x.OrderId);
+            });
+
+            modelBuilder.Entity<CheckoutSession>(entity =>
+            {
+                entity.ToTable("CheckoutSessions");
+                entity.HasKey(x => x.Id);
+                entity.Property(x => x.UserId).IsRequired();
+                entity.Property(x => x.Status).HasConversion<string>();
+                entity.Property(x => x.PaymentMethod).HasConversion<string>();
+                entity.Property(x => x.IdempotencyKey);
+                entity.HasIndex(x => x.UserId);
+                entity.HasIndex(x => x.Status);
+                entity.HasIndex(x => x.IdempotencyKey);
+                entity.HasOne(x => x.Order)
+                      .WithOne(o => o.CheckoutSession)
+                      .HasForeignKey<CheckoutSession>(x => x.OrderId);
+            });
+
+            modelBuilder.Entity<CheckoutSessionItem>(entity =>
+            {
+                entity.ToTable("CheckoutSessionItems");
+                entity.HasKey(x => x.Id);
+                entity.Property(x => x.ProductName).IsRequired();
+                entity.HasOne(x => x.CheckoutSession)
+                      .WithMany(s => s.Items)
+                      .HasForeignKey(x => x.CheckoutSessionId)
+                      .OnDelete(DeleteBehavior.Cascade);
+                entity.HasIndex(x => x.CheckoutSessionId);
+                entity.HasIndex(x => x.ProductId);
+                entity.HasIndex(x => x.SellerId);
             });
         }
     }

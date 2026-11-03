@@ -30,6 +30,13 @@ namespace UserService.Infrastructure.Repositories
             return await _context.Users
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
+
+        public async Task<User?> GetByIdIncludingDeletedAsync(Guid id)
+        {
+            return await _context.Users
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == id);
+        }
         public async Task<User?> GetByEmailAsync(string email)
         {
             return await _context.Users
@@ -45,6 +52,7 @@ namespace UserService.Infrastructure.Repositories
         public async Task<List<User>> GetAllAsync(int page, int pageSize)
         {
             return await _context.Users
+                .OrderByDescending(u => u.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -62,6 +70,7 @@ namespace UserService.Infrastructure.Repositories
                     u.FullName.Contains(keyword) ||
                     u.Id.ToString().Contains(keyword)
                 )
+                .OrderByDescending(u => u.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -113,7 +122,7 @@ namespace UserService.Infrastructure.Repositories
         public async Task RestoreUserAsync(Guid userId)
         {
             var user = await _context.Users
-                .IgnoreQueryFilters() // ❗ cực quan trọng
+                .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
@@ -152,7 +161,15 @@ namespace UserService.Infrastructure.Repositories
         {
             return await _context.UserAddresses
                 .Where(x => x.UserId == userId)
+                .OrderByDescending(x => x.IsDefault)
+                .ThenByDescending(x => x.CreatedAt)
                 .ToListAsync();
+        }
+
+        public async Task<UserAddress?> GetUserAddressByIdAsync(Guid addressId)
+        {
+            return await _context.UserAddresses
+                .FirstOrDefaultAsync(x => x.Id == addressId);
         }
 
         public async Task AddUserAddressAsync(UserAddress address)
@@ -161,12 +178,50 @@ namespace UserService.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task UpdateUserAddressAsync(UserAddress address)
+        {
+            _context.UserAddresses.Update(address);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteUserAddressAsync(UserAddress address)
+        {
+            _context.UserAddresses.Remove(address);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task SetDefaultAddressAsync(Guid userId, Guid addressId)
+        {
+            var addresses = await _context.UserAddresses
+                .Where(x => x.UserId == userId)
+                .ToListAsync();
+
+            foreach (var addr in addresses)
+            {
+                addr.IsDefault = addr.Id == addressId;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<List<UserSession>> GetUserDevicesAsync(Guid userId)
         {
             return await _context.UserSessions
-                .Where(x => x.UserId == userId && x.IsActive)
+                .Where(x => x.UserId == userId)
                 .OrderByDescending(x => x.LoginAt)
                 .ToListAsync();
+        }
+
+        public async Task<UserSession?> GetUserDeviceByIdAsync(Guid deviceId)
+        {
+            return await _context.UserSessions
+                .FirstOrDefaultAsync(x => x.Id == deviceId);
+        }
+
+        public async Task RemoveUserDeviceAsync(UserSession session)
+        {
+            _context.UserSessions.Remove(session);
+            await _context.SaveChangesAsync();
         }
 
         public async Task LogoutAllDevicesAsync(Guid userId)
@@ -193,5 +248,26 @@ namespace UserService.Infrastructure.Repositories
         {
             await _context.SaveChangesAsync();
         }
+
+        public async Task<int> GetTotalUsersCountAsync()
+        {
+            return await _context.Users.IgnoreQueryFilters().CountAsync();
+        }
+
+        public async Task<int> GetActiveUsersCountAsync()
+        {
+            return await _context.Users.CountAsync();
+        }
+
+        public async Task<int> GetBlockedUsersCountAsync()
+        {
+            return await _context.Users.IgnoreQueryFilters().CountAsync(u => u.IsBlocked);
+        }
+
+        public async Task<int> GetDeletedUsersCountAsync()
+        {
+            return await _context.Users.IgnoreQueryFilters().CountAsync(u => u.IsDeleted);
+        }
     }
 }
+

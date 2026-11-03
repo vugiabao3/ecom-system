@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Inventory from "../pages/Inventory";
 import ProductList from "../pages/ProductList";
 import ProductDetail from "../pages/ProductDetail";
 import Cart from "../pages/Cart";
@@ -7,13 +8,22 @@ import Payment from "../pages/Payment";
 import PaymentSuccess from "../pages/PaymentSuccess";
 import PaymentFailed from "../pages/PaymentFailed";
 import QRPaymentMock from "../pages/QRPaymentMock";
-import OrderDetails from "../pages/OrderDetails";
-import Orders from "../pages/Orders";
+import OrderDetail from "../pages/OrderDetail";
+import OrderShipping from "../pages/OrderShipping";
+import OrderCompleted from "../pages/OrderCompleted";
+import OrderCancelled from "../pages/OrderCancelled";
+import OrderReturned from "../pages/OrderReturned";
+import OrderTimeline from "../pages/OrderTimeline";
+import MyOrders from "../pages/MyOrders";
+import OrderConfirmation from "../pages/OrderConfirmation";
+import OrderConfirmationResult from "../pages/OrderConfirmationResult";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import ChangePassword from "../pages/ChangePassword";
+import VerifyEmail from "../pages/VerifyEmail";
+import ResendVerification from "../pages/ResendVerification";
 import Profile from "../pages/Profile";
 import Home from "../pages/Home";
 
@@ -50,6 +60,7 @@ export default function AppRoutes() {
                 {/* Public Storefront Routes */}
                 <Route path="/" element={<Home />} />
                 <Route path="/products" element={<ProductList />} />
+                <Route path="/inventory" element={<Inventory />} />
                 <Route path="/products/:id" element={<ProductDetail />} />
 
                 {/* Auth Routes */}
@@ -57,6 +68,9 @@ export default function AppRoutes() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
+                <Route path="/resend-verification" element={<ResendVerification />} />
+
 
                 {/* User Protected Routes */}
                 <Route
@@ -127,15 +141,71 @@ export default function AppRoutes() {
                     path="/orders"
                     element={
                         <ProtectedRoute>
-                            <Orders />
+                            <MyOrders />
                         </ProtectedRoute>
                     }
                 />
                 <Route
-                    path="/orders/:id"
+                    path="/orders/:orderId"
                     element={
                         <ProtectedRoute>
-                            <OrderDetails />
+                            <OrderDetail />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/orders/shipping"
+                    element={
+                        <ProtectedRoute>
+                            <OrderShipping />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/orders/completed"
+                    element={
+                        <ProtectedRoute>
+                            <OrderCompleted />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/orders/cancelled"
+                    element={
+                        <ProtectedRoute>
+                            <OrderCancelled />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/orders/returned"
+                    element={
+                        <ProtectedRoute>
+                            <OrderReturned />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/orders/timeline/:orderId"
+                    element={
+                        <ProtectedRoute>
+                            <OrderTimeline />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/order-confirmation"
+                    element={
+                        <ProtectedRoute>
+                            <OrderConfirmation />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/order-confirmation/:id"
+                    element={
+                        <ProtectedRoute>
+                            <OrderConfirmationResult />
                         </ProtectedRoute>
                     }
                 />

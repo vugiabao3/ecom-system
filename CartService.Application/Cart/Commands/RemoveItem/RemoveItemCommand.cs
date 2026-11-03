@@ -9,6 +9,6 @@ namespace CartService.Application.Cart.Commands.RemoveItem
 {
     public class RemoveItemCommand : IRequest<RemoveItemResponse>
     {
-        public Guid ProductId { get; set; }
+        public Guid ItemId { get; set; }
     }
 }

@@ -46,4 +46,12 @@ namespace EcomSystem.Contracts.Enums
         QR = 0,
         COD = 1
     }
+
+    public enum CheckoutSessionStatus
+    {
+        Pending = 0,
+        Completed = 1,
+        Expired = 2,
+        Cancelled = 3
+    }
 }

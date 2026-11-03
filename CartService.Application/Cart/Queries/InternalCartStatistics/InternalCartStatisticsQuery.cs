@@ -1,0 +1,2 @@
+using MediatR;
+namespace CartService.Application.Cart.Queries.InternalCartStatistics { public class InternalCartStatisticsQuery : IRequest<InternalCartStatisticsResponse> { } public class InternalCartStatisticsResponse { public int TotalCarts { get; set; } public int TotalItems { get; set; } } }
