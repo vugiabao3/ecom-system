@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { login as apiLogin } from "../services/authApi";
 import { useAuth } from "../context/AuthContext";
@@ -14,6 +14,27 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (isDemoMode()) {
+            setEmail("111@gmail.com");
+            setPassword("111");
+        }
+    }, []);
+
+    const handleDemoLogin = () => {
+        if (loading) return;
+        setLoading(true);
+        setError(null);
+        const ok = demoLogin("111@gmail.com", "111");
+        if (!ok) {
+            setError("Invalid demo credentials.");
+            setLoading(false);
+            return;
+        }
+        navigate("/");
+        setLoading(false);
+    };
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -115,6 +136,26 @@ export default function Login() {
                             {loading ? "Signing in..." : "Sign In"}
                         </button>
                     </form>
+
+                    {isDemoMode() && (
+                        <div style={{ marginTop: "16px", textAlign: "center" }}>
+                            <button
+                                type="button"
+                                disabled={loading}
+                                className="auth-button auth-button-primary"
+                                onClick={handleDemoLogin}
+                                style={{ width: "100%" }}
+                            >
+                                {loading ? "Đang đăng nhập..." : "Đăng nhập Demo ngay"}
+                            </button>
+                            <p style={{ fontSize: "12px", marginTop: "8px", color: "#666" }}>
+                                Tài khoản trải nghiệm dành cho nhà tuyển dụng – Không cần đăng ký.
+                            </p>
+                            <div style={{ fontSize: "12px", marginTop: "4px", color: "#999" }}>
+                                Demo: 111@gmail.com / 111
+                            </div>
+                        </div>
+                    )}
 
                     <div className="auth-divider">
                         <span>or</span>
