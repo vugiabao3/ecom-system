@@ -2,11 +2,12 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { login as apiLogin } from "../services/authApi";
 import { useAuth } from "../context/AuthContext";
+import { isDemoMode } from "../demo/store";
 import "../styles/auth.css";
 
 export default function Login() {
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, demoLogin } = useAuth();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -24,6 +25,15 @@ export default function Login() {
         setLoading(true);
         setError(null);
         try {
+            if (isDemoMode()) {
+                const ok = demoLogin(email.trim(), password);
+                if (!ok) {
+                    setError("Invalid demo credentials. Use 111@gmail.com / 111.");
+                    return;
+                }
+                navigate("/");
+                return;
+            }
             const res = await apiLogin({
                 email: email.trim(),
                 password,
