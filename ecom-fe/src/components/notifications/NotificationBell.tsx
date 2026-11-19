@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+import { isDemoMode } from "../../demo/store";
 const api = axios.create({ baseURL: import.meta.env.VITE_NOTIFICATION_API_URL || "http://localhost:5039" });
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
@@ -13,6 +14,7 @@ export default function NotificationBell() {
   const [items, setItems] = useState<Notification[]>([]);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  if (isDemoMode()) return null;
   const load = async () => {
     setLoading(true);
     try {
