@@ -38,13 +38,15 @@ namespace NotificationService.Infrastructure.Messaging
 
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
             channel.QueueDeclare(
-                queue: "PaymentSucceededEvent",
+                queue: "NotificationService.PaymentSucceededEvent",
                 durable: true,
                 exclusive: false,
                 autoDelete: false
             );
+            channel.QueueBind("NotificationService.PaymentSucceededEvent", "ecom.events", "PaymentSucceededEvent");
 
             Console.WriteLine("?? PaymentSucceededConsumer started...");
 
@@ -60,6 +62,7 @@ namespace NotificationService.Infrastructure.Messaging
                 var evt = JsonSerializer.Deserialize<PaymentSucceededEvent>(json);
 
                 if (evt == null) return;
+                if (string.IsNullOrWhiteSpace(evt.UserId)) { Console.WriteLine($"WARN: missing recipient UserId for {evt.GetType().Name} Order {evt.OrderId}"); return; }
                 Console.WriteLine($"?? Payment success for order: {evt.OrderId}");
 
                 // ?? G?i notification cho khách hàng
@@ -71,20 +74,26 @@ namespace NotificationService.Infrastructure.Messaging
                 var notification = new Notification
                 {
                     Id = Guid.NewGuid(),
-                    UserId = null,
+                    UserId = evt.UserId,
                     Type = "PaymentSucceeded",
+                    Title = "PaymentSucceeded",
                     Message = $"Payment success for Order {evt.OrderId}",
                     CreatedAt = DateTime.UtcNow
                 };
 
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                if (!await NotificationServices.ShouldCreateAsync(db, evt.UserId!, notification.Message)) { Console.WriteLine("SKIP duplicate notification"); return; }
                 await repo.AddAsync(notification);
                 await repo.SaveChangesAsync();
             };
             channel.BasicConsume(
-                queue: "PaymentSucceededEvent",
+                queue: "NotificationService.PaymentSucceededEvent",
                 autoAck: true,
                 consumer: consumer
             );
         }
     }
 }
+
+
+

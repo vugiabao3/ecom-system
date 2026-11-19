@@ -1,4 +1,4 @@
-﻿//using System;
+//using System;
 //using System.Collections.Generic;
 //using System.Linq;
 //using System.Text;
@@ -28,17 +28,19 @@
 //            var factory = new ConnectionFactory() { HostName = "rabbitmq" };
 //            var connection = factory.CreateConnection();
 //            var channel = connection.CreateModel();
+//            channel.ExchangeDeclare("ecom.events", "topic", true);
 
-//            channel.QueueDeclare("ShippingCreatedEvent", false, false, false);
+//            channel.QueueDeclare("ShippingService.ShippingCreatedEvent", false, false, false);
+//            channel.QueueBind("ShippingService.ShippingCreatedEvent", "ecom.events", "ShippingCreatedEvent");
 
-//            Console.WriteLine("📦 ShippingCreatedConsumer STARTED...");
+//            Console.WriteLine("?? ShippingCreatedConsumer STARTED...");
 
 //            var consumer = new EventingBasicConsumer(channel);
 
 //            consumer.Received += async (model, ea) =>
 //            {
 //                var json = Encoding.UTF8.GetString(ea.Body.ToArray());
-//                Console.WriteLine($"📩 RECEIVED ShippingCreated: {json}");
+//                Console.WriteLine($"?? RECEIVED ShippingCreated: {json}");
 
 //                var evt = JsonSerializer.Deserialize<ShippingCreatedEvent>(json);
 
@@ -54,10 +56,10 @@
 //                    Status = "DELIVERING"
 //                });
 
-//                Console.WriteLine("🚚 Status updated to DELIVERING");
+//                Console.WriteLine("?? Status updated to DELIVERING");
 //            };
 
-//            channel.BasicConsume("ShippingCreatedEvent", true, consumer);
+//            channel.BasicConsume("ShippingService.ShippingCreatedEvent", true, consumer);
 //        }
 //    }
 //}

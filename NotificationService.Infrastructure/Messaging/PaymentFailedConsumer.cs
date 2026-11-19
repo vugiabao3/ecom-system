@@ -38,13 +38,15 @@ namespace NotificationService.Infrastructure.Messaging
 
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
             channel.QueueDeclare(
-                queue: "PaymentFailedEvent",
+                queue: "NotificationService.PaymentFailedEvent",
                 durable: true,
                 exclusive: false,
                 autoDelete: false
             );
+            channel.QueueBind("NotificationService.PaymentFailedEvent", "ecom.events", "PaymentFailedEvent");
 
             Console.WriteLine("?? PaymentFailedConsumer started...");
 
@@ -60,6 +62,7 @@ namespace NotificationService.Infrastructure.Messaging
                 var evt = JsonSerializer.Deserialize<PaymentFailedEvent>(json);
 
                 if (evt == null) return;
+                if (string.IsNullOrWhiteSpace(evt.UserId)) { Console.WriteLine($"WARN: missing recipient UserId for {evt.GetType().Name} Order {evt.OrderId}"); return; }
 
                 // ?? G?i notification cho khách hàng
                 await _notificationService.SendPaymentFailed(evt.OrderId);
@@ -70,21 +73,27 @@ namespace NotificationService.Infrastructure.Messaging
                 var notification = new Notification
                 {
                     Id = Guid.NewGuid(),
-                    UserId = null,
+                    UserId = evt.UserId,
                     Type = "PaymentFailed",
+                    Title = "PaymentFailed",
                     Message = $"Payment failed for Order {evt.OrderId}",
                     CreatedAt = DateTime.UtcNow
                 };
 
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                if (!await NotificationServices.ShouldCreateAsync(db, evt.UserId!, notification.Message)) { Console.WriteLine("SKIP duplicate notification"); return; }
                 await repo.AddAsync(notification);
                 await repo.SaveChangesAsync();
             };
 
                 channel.BasicConsume(
-                queue: "PaymentFailedEvent",
+                queue: "NotificationService.PaymentFailedEvent",
                 autoAck: true,
                 consumer: consumer
             );
         }
     }
 }
+
+
+

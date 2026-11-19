@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
@@ -26,14 +26,16 @@ namespace CartService.Infrastructure.Events
 
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
             channel.QueueDeclare(
-                queue: "ProductDeleted",
+                queue: "CartService.ProductDeleted",
                 durable: true,
                 exclusive: false,
                 autoDelete: false,
                 arguments: null
             );
+            channel.QueueBind("CartService.ProductDeleted", "ecom.events", "ProductDeleted");
 
             var consumer = new EventingBasicConsumer(channel);
 
@@ -60,7 +62,7 @@ namespace CartService.Infrastructure.Events
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"❌ Consumer error: {ex.Message}");
+                    Console.WriteLine($"? Consumer error: {ex.Message}");
 
                     // optional: reject message
                     channel.BasicNack(ea.DeliveryTag, false, true);
@@ -68,7 +70,7 @@ namespace CartService.Infrastructure.Events
             };
 
             channel.BasicConsume(
-                queue: "ProductDeleted",
+                queue: "CartService.ProductDeleted",
                 autoAck: false,
                 consumer: consumer
             );

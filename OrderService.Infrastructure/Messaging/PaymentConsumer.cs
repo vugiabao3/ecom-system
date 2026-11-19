@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,9 +28,11 @@ namespace OrderService.Infrastructure.Messaging
 
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
-            // 🔥 queue success
-            channel.QueueDeclare("PaymentSucceededEvent", true, false, false);
+            // ?? queue success
+            channel.QueueDeclare("OrderService.PaymentSucceededEvent", true, false, false);
+            channel.QueueBind("OrderService.PaymentSucceededEvent", "ecom.events", "PaymentSucceededEvent");
 
             var consumer1 = new EventingBasicConsumer(channel);
 
@@ -48,10 +50,11 @@ namespace OrderService.Infrastructure.Messaging
 
                 await handler.Handle(@event);
             };
-                        channel.BasicConsume("PaymentSucceededEvent", true, consumer1);
+                        channel.BasicConsume("OrderService.PaymentSucceededEvent", true, consumer1);
 
-            // 🔥 queue failed
-            channel.QueueDeclare("PaymentFailedEvent", true, false, false);
+            // ?? queue failed
+            channel.QueueDeclare("OrderService.PaymentFailedEvent", true, false, false);
+            channel.QueueBind("OrderService.PaymentFailedEvent", "ecom.events", "PaymentFailedEvent");
 
             var consumer2 = new EventingBasicConsumer(channel);
 
@@ -70,7 +73,8 @@ namespace OrderService.Infrastructure.Messaging
                 await handler.Handle(@event);
             };
 
-            channel.BasicConsume("PaymentFailedEvent", true, consumer2);
+            channel.BasicConsume("OrderService.PaymentFailedEvent", true, consumer2);
         }
     }
 }
+

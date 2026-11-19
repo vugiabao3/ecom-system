@@ -33,14 +33,16 @@ namespace NotificationService.Infrastructure.Messaging
 
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
             channel.QueueDeclare(
-                queue: "ShippingCreatedEvent",
+                queue: "NotificationService.ShippingCreatedEvent",
                 durable: true,
                 exclusive: false,
                 autoDelete: false,
                 arguments: null
             );
+            channel.QueueBind("NotificationService.ShippingCreatedEvent", "ecom.events", "ShippingCreatedEvent");
             Console.WriteLine("🔥 ShippingCreatedConsumer started...");
 
             var consumer = new EventingBasicConsumer(channel);
@@ -53,6 +55,7 @@ namespace NotificationService.Infrastructure.Messaging
 
                 var evt = JsonSerializer.Deserialize<ShippingCreatedEvent>(json);
                 if (evt == null) return;
+                if (string.IsNullOrWhiteSpace(evt.UserId)) { Console.WriteLine($"WARN: missing recipient UserId for {evt.GetType().Name} Order {evt.OrderId}"); return; }
 
                 // 👉 Gửi notification cho khách hàng & người bán
                 await _notificationService.SendShippingCreated(evt.OrderId, evt.ShipmentId);
@@ -60,33 +63,29 @@ namespace NotificationService.Infrastructure.Messaging
                 using var scope = _scopeFactory.CreateScope();
                 var repo = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
 
-                var customerNotification = new Notification
+var customerNotification = new Notification
                 {
                     Id = Guid.NewGuid(),
-                    UserId = null,
+                    UserId = evt.UserId,
                     Type = "ShippingCreated_Customer",
+                    Title = "ShippingCreated_Customer",
                     Message = $"Your order {evt.OrderId} is being shipped (Shipment {evt.ShipmentId})",
                     CreatedAt = DateTime.UtcNow
                 };
 
-                var sellerNotification = new Notification
-                {
-                    Id = Guid.NewGuid(),
-                    UserId = null,
-                    Type = "ShippingCreated_Seller",
-                    Message = $"Order {evt.OrderId} has been picked up for shipping (Shipment {evt.ShipmentId})",
-                    CreatedAt = DateTime.UtcNow
-                };
-
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                if (!await NotificationServices.ShouldCreateAsync(db, evt.UserId!, customerNotification.Message)) { Console.WriteLine("SKIP duplicate notification"); return; }
                 await repo.AddAsync(customerNotification);
-                await repo.AddAsync(sellerNotification);
                 await repo.SaveChangesAsync();
             };
             channel.BasicConsume(
-                queue: "ShippingCreatedEvent",
+                queue: "NotificationService.ShippingCreatedEvent",
                 autoAck: true,
                 consumer: consumer
             );
         }
     }
 }
+
+
+

@@ -31,8 +31,10 @@ namespace PaymentService.Infrastructure.Messaging
 
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
-            channel.QueueDeclare("DeliverySucceededEvent", true, false, false);
+            channel.QueueDeclare("PaymentService.DeliverySucceededEvent", true, false, false);
+            channel.QueueBind("PaymentService.DeliverySucceededEvent", "ecom.events", "DeliverySucceededEvent");
 
             var consumer = new EventingBasicConsumer(channel);
 
@@ -65,7 +67,8 @@ namespace PaymentService.Infrastructure.Messaging
                 }
             };
 
-            channel.BasicConsume("DeliverySucceededEvent", true, consumer);
+            channel.BasicConsume("PaymentService.DeliverySucceededEvent", true, consumer);
         }
     }
 }
+

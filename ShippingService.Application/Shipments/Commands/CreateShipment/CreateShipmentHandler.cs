@@ -15,11 +15,13 @@ namespace ShippingService.Application.Shipments.Commands.CreateShipment
     {
         private readonly IShipmentRepository _repo;
         private readonly IEventBus _eventBus;
+        private readonly IOrderServiceClient _orderClient;
 
-        public CreateShipmentHandler(IShipmentRepository repo, IEventBus eventBus)
+        public CreateShipmentHandler(IShipmentRepository repo, IEventBus eventBus, IOrderServiceClient orderClient)
         {
             _repo = repo;
             _eventBus = eventBus;
+            _orderClient = orderClient;
         }
 
         public async Task<CreateShipmentResponse> Handle(CreateShipmentCommand request, CancellationToken cancellationToken)
@@ -50,10 +52,12 @@ namespace ShippingService.Application.Shipments.Commands.CreateShipment
             await _repo.AddAsync(shipment);
             await _repo.SaveChangesAsync();
 
+            var order = await _orderClient.GetOrder(request.OrderId);
             await _eventBus.PublishAsync(new ShippingCreatedEvent
             {
                 OrderId = request.OrderId,
-                ShipmentId = shipment.Id
+                ShipmentId = shipment.Id,
+                UserId = order?.UserId
             });
 
             return new CreateShipmentResponse

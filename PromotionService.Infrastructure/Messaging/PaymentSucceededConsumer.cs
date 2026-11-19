@@ -1,4 +1,4 @@
-﻿using PromotionService.Application.Events;
+using PromotionService.Application.Events;
 using PromotionService.Application.Interfaces;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -30,13 +30,15 @@ namespace PromotionService.Infrastructure.Messaging
 
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
+            _channel.ExchangeDeclare("ecom.events", "topic", true);
 
             _channel.QueueDeclare(
-                queue: "PaymentSucceededEvent",
+                queue: "PromotionService.PaymentSucceededEvent",
                 durable: true,
                 exclusive: false,
                 autoDelete: false
             );
+            _channel.QueueBind("PromotionService.PaymentSucceededEvent", "ecom.events", "PaymentSucceededEvent");
 
             var consumer = new EventingBasicConsumer(_channel);
 
@@ -49,12 +51,12 @@ namespace PromotionService.Infrastructure.Messaging
             };
 
             _channel.BasicConsume(
-                queue: "PaymentSucceededEvent",
+                queue: "PromotionService.PaymentSucceededEvent",
                 autoAck: true,
                 consumer: consumer
             );
 
-            Console.WriteLine("🔥 Promotion Consumer STARTED");
+            Console.WriteLine("?? Promotion Consumer STARTED");
         }
 
         private async Task HandleMessage(string message)
@@ -63,9 +65,9 @@ namespace PromotionService.Infrastructure.Messaging
 
             if (evt == null) return;
 
-            Console.WriteLine($"💳 Payment received for user {evt.UserId}");
+            Console.WriteLine($"?? Payment received for user {evt.UserId}");
 
-            // 🔥 tạo scope mỗi message
+            // ?? t?o scope m?i message
             using var scope = _scopeFactory.CreateScope();
 
             var repo = scope.ServiceProvider.GetRequiredService<IUserPointRepository>();
@@ -80,7 +82,7 @@ namespace PromotionService.Infrastructure.Messaging
                     UserId = evt.UserId,
                     Points = 0
                 };
-                await repo.AddAsync(userPoint); // 🔥 THÊM DÒNG NÀY
+                await repo.AddAsync(userPoint); // ?? TH�M D�NG N�Y
 
             }
 
@@ -95,7 +97,7 @@ namespace PromotionService.Infrastructure.Messaging
 
             Console.WriteLine("USER ID:");
             Console.WriteLine(evt?.UserId);
-            Console.WriteLine($"✅ Updated points: {userPoint.Points}");
+            Console.WriteLine($"? Updated points: {userPoint.Points}");
         }
     }
 }

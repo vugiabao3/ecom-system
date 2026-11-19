@@ -33,14 +33,16 @@ namespace NotificationService.Infrastructure.Messaging
 
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
             channel.QueueDeclare(
-                queue: "ReturnOrderEvent",
+                queue: "NotificationService.ReturnOrderEvent",
                 durable: true,
                 exclusive: false,
                 autoDelete: false,
                 arguments: null
             );
+            channel.QueueBind("NotificationService.ReturnOrderEvent", "ecom.events", "ReturnOrderEvent");
             Console.WriteLine("🔥 ReturnOrderConsumer started...");
 
             var consumer = new EventingBasicConsumer(channel);
@@ -51,10 +53,11 @@ namespace NotificationService.Infrastructure.Messaging
                 var json = Encoding.UTF8.GetString(body);
                 Console.WriteLine($"🔥 Return Order: {json}");
 
-                var evt = JsonSerializer.Deserialize<ReturnOrderEvent>(json);
+var evt = JsonSerializer.Deserialize<ReturnOrderEvent>(json);
                 if (evt == null) return;
+                if (string.IsNullOrWhiteSpace(evt.UserId)) { Console.WriteLine($"WARN: missing recipient UserId for ReturnOrder Order {evt.OrderId}"); return; }
 
-                // 👉 Gửi notification cho khách hàng & người bán
+                // Send notification to the customer
                 await _notificationService.SendReturnOrder(evt.OrderId, evt.Reason ?? "Unknown");
 
                 using var scope = _scopeFactory.CreateScope();
@@ -63,30 +66,26 @@ namespace NotificationService.Infrastructure.Messaging
                 var customerNotification = new Notification
                 {
                     Id = Guid.NewGuid(),
-                    UserId = null,
+                    UserId = evt.UserId,
                     Type = "ReturnOrder_Customer",
+                    Title = "ReturnOrder_Customer",
                     Message = $"Your order {evt.OrderId} has been returned. Reason: {evt.Reason}",
                     CreatedAt = DateTime.UtcNow
                 };
 
-                var sellerNotification = new Notification
-                {
-                    Id = Guid.NewGuid(),
-                    UserId = null,
-                    Type = "ReturnOrder_Seller",
-                    Message = $"Order {evt.OrderId} has been returned. Reason: {evt.Reason}",
-                    CreatedAt = DateTime.UtcNow
-                };
-
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                if (!await NotificationServices.ShouldCreateAsync(db, evt.UserId!, customerNotification.Message)) { Console.WriteLine("SKIP duplicate notification"); return; }
                 await repo.AddAsync(customerNotification);
-                await repo.AddAsync(sellerNotification);
                 await repo.SaveChangesAsync();
             };
             channel.BasicConsume(
-                queue: "ReturnOrderEvent",
+                queue: "NotificationService.ReturnOrderEvent",
                 autoAck: true,
                 consumer: consumer
             );
         }
     }
 }
+
+
+

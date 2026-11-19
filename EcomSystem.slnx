@@ -81,4 +81,8 @@
     <Project Path="UserService.Infrastructure/UserService.Infrastructure.csproj" />
   </Folder>
   <Project Path="Contracts/EcomSystem.Contracts.csproj" Id="2f5346d8-abca-4219-867c-97319a773582" />
+  <Project Path="ReviewService.Api/ReviewService.Api.csproj" />
+  <Project Path="ReviewService.Application/ReviewService.Application.csproj" />
+  <Project Path="ReviewService.Domain/ReviewService.Domain.csproj" />
+  <Project Path="ReviewService.Infrastructure/ReviewService.Infrastructure.csproj" />
 </Solution>

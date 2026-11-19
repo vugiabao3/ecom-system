@@ -29,8 +29,10 @@ namespace ShippingService.Infrastructure.Messaging
 
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
-            channel.QueueDeclare("PaymentPendingEvent", true, false, false);
+            channel.QueueDeclare("ShippingService.PaymentPendingEvent", true, false, false);
+            channel.QueueBind("ShippingService.PaymentPendingEvent", "ecom.events", "PaymentPendingEvent");
 
             Console.WriteLine("🔥 PaymentPendingConsumer started...");
 
@@ -66,7 +68,8 @@ namespace ShippingService.Infrastructure.Messaging
                 Console.WriteLine($"📦 COD shipment created for order {evt.OrderId}");
             };
 
-            channel.BasicConsume("PaymentPendingEvent", true, consumer);
+            channel.BasicConsume("ShippingService.PaymentPendingEvent", true, consumer);
         }
     }
 }
+

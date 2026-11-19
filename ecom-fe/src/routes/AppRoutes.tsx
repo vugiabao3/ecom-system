@@ -25,6 +25,7 @@ import ChangePassword from "../pages/ChangePassword";
 import VerifyEmail from "../pages/VerifyEmail";
 import ResendVerification from "../pages/ResendVerification";
 import Profile from "../pages/Profile";
+import Notifications from "../pages/Notifications";
 import Home from "../pages/Home";
 
 // Seller Pages
@@ -78,6 +79,14 @@ export default function AppRoutes() {
                     element={
                         <ProtectedRoute>
                             <Profile />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/notifications"
+                    element={
+                        <ProtectedRoute>
+                            <Notifications />
                         </ProtectedRoute>
                     }
                 />

@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace ShippingService.Application.Events
 {
     public class DeliverySucceededEvent
@@ -11,6 +5,7 @@ namespace ShippingService.Application.Events
         public Guid OrderId { get; set; }
         public Guid ShipmentId { get; set; }
         public string PaymentMethod { get; set; }
+        public string? UserId { get; set; }
     }
 
     public class DeliveryFailedEvent
@@ -18,5 +13,6 @@ namespace ShippingService.Application.Events
         public Guid OrderId { get; set; }
         public Guid ShipmentId { get; set; }
         public string? Reason { get; set; }
+        public string? UserId { get; set; }
     }
 }

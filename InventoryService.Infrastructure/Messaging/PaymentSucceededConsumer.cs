@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,8 +31,10 @@ namespace InventoryService.Infrastructure.Messaging
 
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
-            channel.QueueDeclare("PaymentSucceededEvent", true, false, false);
+            channel.QueueDeclare("InventoryService.PaymentSucceededEvent", true, false, false);
+            channel.QueueBind("InventoryService.PaymentSucceededEvent", "ecom.events", "PaymentSucceededEvent");
 
             var consumer = new EventingBasicConsumer(channel);
 
@@ -52,7 +54,7 @@ namespace InventoryService.Infrastructure.Messaging
                 await handler.Handle(@event);
             };
 
-            channel.BasicConsume("PaymentSucceededEvent", true, consumer);
+            channel.BasicConsume("InventoryService.PaymentSucceededEvent", true, consumer);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
@@ -34,8 +34,10 @@ namespace PaymentService.Infrastructure.Messaging
 
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
-            channel.QueueDeclare("OrderCreated", true, false, false);
+            channel.QueueDeclare("PaymentService.OrderCreated", true, false, false);
+            channel.QueueBind("PaymentService.OrderCreated", "ecom.events", "OrderCreated");
 
             var consumer = new EventingBasicConsumer(channel);
 
@@ -53,7 +55,7 @@ namespace PaymentService.Infrastructure.Messaging
                         });
                     if (@event == null)
                     {
-                        Console.WriteLine("❌ Event null");
+                        Console.WriteLine("? Event null");
                         return;
                     }
 
@@ -70,15 +72,16 @@ namespace PaymentService.Infrastructure.Messaging
                 }
                 catch (Exception ex)
                 {
-                    // 🔥 QUAN TRỌNG: KHÔNG ĐƯỢC CRASH APP
-                    Console.WriteLine("❌ Consumer error: " + ex.Message);
+                    // ?? QUAN TR?NG: KH�NG �U?C CRASH APP
+                    Console.WriteLine("? Consumer error: " + ex.Message);
 
                     // optional: log DB / retry queue
                 }
             };
 
-            channel.BasicConsume("OrderCreated", autoAck: false, consumer);
+            channel.BasicConsume("PaymentService.OrderCreated", autoAck: false, consumer);
 
         }
     }
 }
+

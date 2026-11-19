@@ -36,31 +36,71 @@ namespace NotificationService.Api.Controllers
 
         [HttpGet("{id}")]
         [Authorize]
-        public IActionResult Detail(Guid id) => Ok(new { id });
+        public async Task<IActionResult> Detail(Guid id)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            var notification = await _db.Notifications.FirstOrDefaultAsync(n => n.Id == id && n.UserId == userId);
+            if (notification == null) return NotFound();
+            return Ok(notification);
+        }
 
         [HttpGet("unread")]
         [Authorize]
-        public IActionResult Unread() => Ok(new List<object>());
+        public async Task<IActionResult> Unread()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            return Ok(await _db.Notifications.Where(n => n.UserId == userId && !n.IsRead).OrderByDescending(n => n.CreatedAt).ToListAsync());
+        }
 
         [HttpGet("unread-count")]
         [Authorize]
-        public IActionResult UnreadCount() => Ok(new { count = 0 });
+        public async Task<IActionResult> UnreadCount()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            var count = await _db.Notifications.CountAsync(n => n.UserId == userId && !n.IsRead);
+            return Ok(new { count });
+        }
 
         [HttpGet("summary")]
         [Authorize]
-        public IActionResult Summary() => Ok(new { total = 0, read = 0, unread = 0 });
+        public async Task<IActionResult> Summary()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            var total = await _db.Notifications.CountAsync(n => n.UserId == userId);
+            var unread = await _db.Notifications.CountAsync(n => n.UserId == userId && !n.IsRead);
+            return Ok(new { total, read = total - unread, unread });
+        }
 
         [HttpPatch("{id}/read")]
         [Authorize]
-        public IActionResult Read(Guid id) => Ok(new { id, message = "Read" });
+        public async Task<IActionResult> Read(Guid id)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            var notification = await _db.Notifications.FirstOrDefaultAsync(n => n.Id == id && n.UserId == userId);
+            if (notification == null)
+                return NotFound();
+
+            notification.IsRead = true;
+            await _db.SaveChangesAsync();
+            return Ok(new { id, message = "Read" });
+        }
 
         [HttpPost("read-all")]
         [Authorize]
-        public IActionResult ReadAll() => Ok(new { message = "All read" });
-
-        [HttpDelete("{id}")]
-        [Authorize]
-        public IActionResult Delete(Guid id) => Ok(new { id, message = "Deleted" });
+        public async Task<IActionResult> ReadAll()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            var notifications = await _db.Notifications.Where(n => n.UserId == userId && !n.IsRead).ToListAsync();
+            foreach (var n in notifications) n.IsRead = true;
+            await _db.SaveChangesAsync();
+            return Ok(new { message = "All read" });
+        }
 
         [HttpPost("delete-batch")]
         [Authorize]
@@ -251,17 +291,35 @@ namespace NotificationService.Api.Controllers
         public IActionResult RetryFailed() => Ok(new { message = "Retry queued" });
 
         [HttpGet("/api/internal/health")]
+        [AllowAnonymous]
         public IActionResult Health() => Ok(new { status = "Healthy" });
         [HttpGet("{id}/read")]
+        [Authorize]
         public async Task<IActionResult> MarkAsRead(Guid id)
         {
-            var notification = await _db.Notifications.FirstOrDefaultAsync(n => n.Id == id);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            var notification = await _db.Notifications.FirstOrDefaultAsync(n => n.Id == id && n.UserId == userId);
             if (notification == null)
                 return NotFound();
 
             notification.IsRead = true;
             await _db.SaveChangesAsync();
             return Ok();
+        }
+        [HttpDelete("{id}")]
+        [Authorize]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            var notification = await _db.Notifications.FirstOrDefaultAsync(n => n.Id == id && n.UserId == userId);
+            if (notification == null)
+                return NotFound();
+
+            _db.Notifications.Remove(notification);
+            await _db.SaveChangesAsync();
+            return Ok(new { id, message = "Deleted" });
         }
     }
 }

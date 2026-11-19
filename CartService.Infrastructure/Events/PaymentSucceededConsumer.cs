@@ -33,12 +33,14 @@ namespace CartService.Infrastructure.Events
 
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
             channel.QueueDeclare(
-                queue: "PaymentSucceeded",
+                queue: "CartService.PaymentSucceeded",
                 durable: true,
                 exclusive: false,
                 autoDelete: false);
+            channel.QueueBind("CartService.PaymentSucceeded", "ecom.events", "PaymentSucceeded");
             var consumer = new EventingBasicConsumer(channel);
 
             consumer.Received += async (model, ea) =>
@@ -63,7 +65,8 @@ namespace CartService.Infrastructure.Events
                 channel.BasicAck(ea.DeliveryTag, false);
             };
 
-            channel.BasicConsume("PaymentSucceeded", false, consumer);
+            channel.BasicConsume("CartService.PaymentSucceeded", false, consumer);
         }
     }
 }
+

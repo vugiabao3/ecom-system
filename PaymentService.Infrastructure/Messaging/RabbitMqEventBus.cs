@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,23 +24,17 @@ namespace PaymentService.Infrastructure.Messaging
 
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
             var queue = typeof(T).Name;
-
-            channel.QueueDeclare(
-                queue: queue,
-                durable: true,
-                exclusive: false,
-                autoDelete: false
-            );
             var json = JsonSerializer.Serialize(@event);
             var body = Encoding.UTF8.GetBytes(json);
 
             var properties = channel.CreateBasicProperties();
             properties.Persistent = true;
-            Console.WriteLine($"🔥 PUBLISH TO QUEUE: {queue}");
+            Console.WriteLine($"?? PUBLISH TO QUEUE: {queue}");
             channel.BasicPublish(
-                exchange: "",
+                exchange: "ecom.events",
                 routingKey: queue,
                 basicProperties: properties,
                 body: body
@@ -50,3 +44,4 @@ namespace PaymentService.Infrastructure.Messaging
         }
     }
 }
+

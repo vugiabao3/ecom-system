@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,13 +18,16 @@ namespace InventoryService.Infrastructure.Messaging
 
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
             var json = JsonSerializer.Serialize(@event);
             var body = Encoding.UTF8.GetBytes(json);
 
-            channel.BasicPublish("", typeof(T).Name, null, body);
+            channel.BasicPublish("ecom.events", typeof(T).Name, null, body);
 
             return Task.CompletedTask;
         }
     }
 }
+
+

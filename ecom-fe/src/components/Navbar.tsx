@@ -1,3 +1,4 @@
+import NotificationBell from "./notifications/NotificationBell";
 import { useNavigate, Link } from "react-router-dom";
 import CartIcon from "./CartIcon";
 import { useAuth } from "../context/AuthContext";
@@ -66,7 +67,8 @@ export default function Navbar() {
                             <CartIcon />
                         )}
 
-                        <div className="navbar-user-section">
+<div className="navbar-user-section">
+                        <NotificationBell />
                             {roleBadge && (
                                 <span
                                     style={{

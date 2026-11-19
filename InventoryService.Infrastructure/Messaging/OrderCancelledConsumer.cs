@@ -22,8 +22,10 @@ namespace InventoryService.Infrastructure.Messaging
             var factory = new ConnectionFactory() { HostName = "rabbitmq" };
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
-            channel.QueueDeclare("OrderCancelled", true, false, false);
+            channel.QueueDeclare("InventoryService.OrderCancelled", true, false, false);
+            channel.QueueBind("InventoryService.OrderCancelled", "ecom.events", "OrderCancelled");
 
             var consumer = new EventingBasicConsumer(channel);
 
@@ -38,7 +40,8 @@ namespace InventoryService.Infrastructure.Messaging
                 await handler.Handle(@event);
             };
 
-            channel.BasicConsume("OrderCancelled", true, consumer);
+            channel.BasicConsume("InventoryService.OrderCancelled", true, consumer);
         }
     }
 }
+

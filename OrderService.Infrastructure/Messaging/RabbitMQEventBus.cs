@@ -1,4 +1,4 @@
-﻿using OrderService.Application.Interfaces;
+using OrderService.Application.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,16 +24,17 @@ namespace OrderService.Infrastructure.Messaging
 
         public Task PublishAsync<T>(string queueName, T @event)
         {
-            using var connection = _factory.CreateConnection(); // ✅ sync
-            using var channel = connection.CreateModel();       // ✅ sync
+            using var connection = _factory.CreateConnection(); // ? sync
+            using var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);       // ? sync
 
-            channel.QueueDeclare(queueName, true, false, false);
+            
 
             var message = JsonSerializer.Serialize(@event);
             var body = Encoding.UTF8.GetBytes(message);
 
             channel.BasicPublish(
-                exchange: "",
+                exchange: "ecom.events",
                 routingKey: queueName,
                 basicProperties: null,
                 body: body
@@ -43,3 +44,4 @@ namespace OrderService.Infrastructure.Messaging
         }
     }
 }
+

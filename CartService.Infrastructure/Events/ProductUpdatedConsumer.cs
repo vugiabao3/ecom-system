@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
@@ -34,12 +34,14 @@ namespace CartService.Infrastructure.Events
 
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
             channel.QueueDeclare(
-                queue: "ProductUpdated",
+                queue: "CartService.ProductUpdated",
                 durable: true,
                 exclusive: false,
                 autoDelete: false);
+            channel.QueueBind("CartService.ProductUpdated", "ecom.events", "ProductUpdated");
             var consumer = new EventingBasicConsumer(channel);
 
             consumer.Received += async (model, ea) =>
@@ -59,7 +61,8 @@ namespace CartService.Infrastructure.Events
                 channel.BasicAck(ea.DeliveryTag, false);
             };
 
-            channel.BasicConsume("ProductUpdated", false, consumer);
+            channel.BasicConsume("CartService.ProductUpdated", false, consumer);
         }
     }
 }
+

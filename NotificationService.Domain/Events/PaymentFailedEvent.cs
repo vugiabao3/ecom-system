@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-namespace NotificationService.Domain.Events
+﻿namespace NotificationService.Domain.Events;
+
+public class PaymentFailedEvent
 {
-    public class PaymentFailedEvent
-    {
-        public Guid OrderId { get; set; }
-   
-    }
+    public Guid OrderId { get; set; }
+    public string? UserId { get; set; }
 }

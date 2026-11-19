@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.Json;
 using RabbitMQ.Client;
 using ShippingService.Application.Interfaces;
@@ -20,7 +20,7 @@ namespace ShippingService.Infrastructure.Messaging
 
             _connection = factory.CreateConnection();
 
-            Console.WriteLine("🔥 RabbitMQ CONNECTED");
+            Console.WriteLine("?? RabbitMQ CONNECTED");
         }
 
         public Task PublishAsync<T>(T @event)
@@ -29,13 +29,7 @@ namespace ShippingService.Infrastructure.Messaging
                 throw new Exception("RabbitMQ connection is closed");
 
             using var channel = _connection.CreateModel();
-
-            channel.QueueDeclare(
-                queue: QueueName,
-                durable: true,
-                exclusive: false,
-                autoDelete: false
-            );
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
             var json = JsonSerializer.Serialize(@event);
             var body = Encoding.UTF8.GetBytes(json);
@@ -43,19 +37,21 @@ namespace ShippingService.Infrastructure.Messaging
             var properties = channel.CreateBasicProperties();
             properties.Persistent = true;
 
-            Console.WriteLine("🚀 PUBLISHING EVENT -> " + QueueName);
+            Console.WriteLine("?? PUBLISHING EVENT -> " + QueueName);
             Console.WriteLine(json);
 
             channel.BasicPublish(
-                exchange: "",
+                exchange: "ecom.events",
                 routingKey: QueueName,
                 basicProperties: properties,
                 body: body
             );
 
-            Console.WriteLine("✅ EVENT PUBLISHED SUCCESSFULLY");
+            Console.WriteLine("? EVENT PUBLISHED SUCCESSFULLY");
 
             return Task.CompletedTask;
         }
     }
 }
+
+

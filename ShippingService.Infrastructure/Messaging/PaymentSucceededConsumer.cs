@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -31,23 +31,25 @@ namespace ShippingService.Infrastructure.Messaging
 
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
             channel.QueueDeclare(
-                queue: "PaymentSucceededEvent",
+                queue: "ShippingService.PaymentSucceededEvent",
                 durable: true,
                 exclusive: false,
                 autoDelete: false
             );
+            channel.QueueBind("ShippingService.PaymentSucceededEvent", "ecom.events", "PaymentSucceededEvent");
 
-            Console.WriteLine("🚚 ShippingConsumer STARTED, waiting message...");
+            Console.WriteLine("?? ShippingConsumer STARTED, waiting message...");
 
             var consumer = new EventingBasicConsumer(channel);
-            Console.WriteLine("🔥 BEFORE RECEIVED");
+            Console.WriteLine("?? BEFORE RECEIVED");
             consumer.Received += async (model, ea) =>
             {
                 try
                 {
-                    Console.WriteLine("📩 RECEIVED EVENT");
+                    Console.WriteLine("?? RECEIVED EVENT");
 
                     var json = Encoding.UTF8.GetString(ea.Body.ToArray());
 
@@ -57,11 +59,11 @@ namespace ShippingService.Infrastructure.Messaging
 
                     if (evt == null)
                     {
-                        Console.WriteLine("❌ Deserialize FAILED");
+                        Console.WriteLine("? Deserialize FAILED");
                         return;
                     }
 
-                    Console.WriteLine($"✅ Parsed OrderId: {evt.OrderId}");
+                    Console.WriteLine($"? Parsed OrderId: {evt.OrderId}");
 
                     using var scope = _scopeFactory.CreateScope();
 
@@ -71,17 +73,17 @@ namespace ShippingService.Infrastructure.Messaging
                     var orderClient = scope.ServiceProvider
                         .GetRequiredService<IOrderServiceClient>();
 
-                    Console.WriteLine("🚀 CALL ORDER SERVICE...");
+                    Console.WriteLine("?? CALL ORDER SERVICE...");
 
                     var order = await orderClient.GetOrder(evt.OrderId);
 
                     if (order == null)
                     {
-                        Console.WriteLine("❌ ORDER IS NULL");
+                        Console.WriteLine("? ORDER IS NULL");
                         return;
                     }
 
-                    Console.WriteLine("📦 ORDER DATA:");
+                    Console.WriteLine("?? ORDER DATA:");
                     Console.WriteLine($"Address: {order.Address}");
                     Console.WriteLine($"Phone: {order.Phone}");
                     Console.WriteLine($"Receiver: {order.ReceiverName}");
@@ -94,26 +96,26 @@ namespace ShippingService.Infrastructure.Messaging
                         ReceiverName = order.ReceiverName
                     });
 
-                    Console.WriteLine("✅ SHIPMENT CREATED SUCCESSFULLY");
+                    Console.WriteLine("? SHIPMENT CREATED SUCCESSFULLY");
 
                     channel.BasicAck(ea.DeliveryTag, false);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("❌ CONSUMER ERROR");
+                    Console.WriteLine("? CONSUMER ERROR");
                     Console.WriteLine(ex.Message);
                     Console.WriteLine(ex.StackTrace);
                 }
             };
-            Console.WriteLine("🔥 BEFORE BASIC CONSUME");
+            Console.WriteLine("?? BEFORE BASIC CONSUME");
 
-            // 🔥 CỰC QUAN TRỌNG
+            // ?? C?C QUAN TR?NG
             channel.BasicConsume(
-                queue: "PaymentSucceededEvent",
+                queue: "ShippingService.PaymentSucceededEvent",
                 autoAck: false,
                 consumer: consumer
             );
-            Console.WriteLine("🔥 AFTER BASIC CONSUME");
+            Console.WriteLine("?? AFTER BASIC CONSUME");
         }
     }
 }

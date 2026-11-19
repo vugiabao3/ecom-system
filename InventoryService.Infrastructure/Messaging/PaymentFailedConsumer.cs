@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,8 +27,10 @@ namespace InventoryService.Infrastructure.Messaging
             var factory = new ConnectionFactory() { HostName = "rabbitmq" };
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
-            channel.QueueDeclare("PaymentFailedEvent", true, false, false);
+            channel.QueueDeclare("InventoryService.PaymentFailedEvent", true, false, false);
+            channel.QueueBind("InventoryService.PaymentFailedEvent", "ecom.events", "PaymentFailedEvent");
 
             var consumer = new EventingBasicConsumer(channel);
 
@@ -47,7 +49,8 @@ namespace InventoryService.Infrastructure.Messaging
                 await handler.Handle(@event);
             };
 
-            channel.BasicConsume("PaymentFailedEvent", true, consumer);
+            channel.BasicConsume("InventoryService.PaymentFailedEvent", true, consumer);
         }
     }
 }
+

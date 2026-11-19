@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,7 +63,8 @@ namespace ShippingService.Application.Shipments.Commands.UpdateShipmentStatus
                 {
                     OrderId = shipment.OrderId,
                     ShipmentId = shipment.Id,
-                    PaymentMethod = order?.PaymentMethod ?? "QR"
+                    PaymentMethod = order?.PaymentMethod ?? "QR",
+                    UserId = order?.UserId
                 });
             }
 
@@ -74,7 +75,8 @@ namespace ShippingService.Application.Shipments.Commands.UpdateShipmentStatus
                 {
                     OrderId = shipment.OrderId,
                     ShipmentId = shipment.Id,
-                    Reason = request.FailureReason
+                    Reason = request.FailureReason,
+                    UserId = order?.UserId
                 });
                 await _eventBus.PublishAsync(new ReturnOrderEvent
                 {
@@ -103,3 +105,4 @@ namespace ShippingService.Application.Shipments.Commands.UpdateShipmentStatus
         }
     }
 }
+

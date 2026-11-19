@@ -22,8 +22,10 @@ namespace InventoryService.Infrastructure.Messaging
             var factory = new ConnectionFactory() { HostName = "rabbitmq" };
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
-            channel.QueueDeclare("DeliveryFailed", true, false, false);
+            channel.QueueDeclare("InventoryService.DeliveryFailed", true, false, false);
+            channel.QueueBind("InventoryService.DeliveryFailed", "ecom.events", "DeliveryFailed");
 
             var consumer = new EventingBasicConsumer(channel);
 
@@ -38,7 +40,8 @@ namespace InventoryService.Infrastructure.Messaging
                 await handler.Handle(@event);
             };
 
-            channel.BasicConsume("DeliveryFailed", true, consumer);
+            channel.BasicConsume("InventoryService.DeliveryFailed", true, consumer);
         }
     }
 }
+

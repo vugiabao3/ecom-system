@@ -1,4 +1,4 @@
-﻿using ProductService.Application.Interfaces;
+using ProductService.Application.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,29 +20,24 @@ namespace ProductService.Infrastructure.Messaging
 
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
             var eventName = "ProductDeleted";
-            channel.QueueDeclare(
-                queue: eventName,
-                durable: true,
-                exclusive: false,
-                autoDelete: false,
-                arguments: null
-            );
             var body = Encoding.UTF8.GetBytes(
                 JsonSerializer.Serialize(@event)
             );
 
             channel.BasicPublish(
-                exchange: "",
+                exchange: "ecom.events",
                 routingKey: eventName,
                 basicProperties: null,
                 body: body
             );
 
-            Console.WriteLine($"🔥 EVENT SENT TO RABBITMQ: {eventName}");
+            Console.WriteLine($"?? EVENT SENT TO RABBITMQ: {eventName}");
 
             return Task.CompletedTask;
         }
     }
 }
+

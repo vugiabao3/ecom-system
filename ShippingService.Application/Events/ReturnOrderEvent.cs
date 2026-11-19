@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace ShippingService.Application.Events
 {
     public class ReturnOrderEvent
@@ -11,6 +5,7 @@ namespace ShippingService.Application.Events
         public Guid OrderId { get; set; }
         public Guid ShipmentId { get; set; }
         public string? Reason { get; set; }
-        public List<DTOs.OrderItemDto> Items { get; set; }
+        public string? UserId { get; set; }
+        public List<DTOs.OrderItemDto>? Items { get; set; }
     }
 }

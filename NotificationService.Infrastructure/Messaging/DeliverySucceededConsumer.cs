@@ -33,14 +33,16 @@ namespace NotificationService.Infrastructure.Messaging
 
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
+            channel.ExchangeDeclare("ecom.events", "topic", true);
 
             channel.QueueDeclare(
-                queue: "DeliverySucceededEvent",
+                queue: "NotificationService.DeliverySucceededEvent",
                 durable: true,
                 exclusive: false,
                 autoDelete: false,
                 arguments: null
             );
+            channel.QueueBind("NotificationService.DeliverySucceededEvent", "ecom.events", "DeliverySucceededEvent");
             Console.WriteLine("🔥 DeliverySucceededConsumer started...");
 
             var consumer = new EventingBasicConsumer(channel);
@@ -51,10 +53,11 @@ namespace NotificationService.Infrastructure.Messaging
                 var json = Encoding.UTF8.GetString(body);
                 Console.WriteLine($"🔥 Delivery Succeeded: {json}");
 
-                var evt = JsonSerializer.Deserialize<DeliverySucceededEvent>(json);
+var evt = JsonSerializer.Deserialize<DeliverySucceededEvent>(json);
                 if (evt == null) return;
+                if (string.IsNullOrWhiteSpace(evt.UserId)) { Console.WriteLine($"WARN: missing recipient UserId for DeliverySucceeded Order {evt.OrderId}"); return; }
 
-                // 👉 Gửi notification cho khách hàng, người bán & admin
+                // Send notification to the customer
                 await _notificationService.SendDeliverySuccess(evt.OrderId);
 
                 using var scope = _scopeFactory.CreateScope();
@@ -63,40 +66,26 @@ namespace NotificationService.Infrastructure.Messaging
                 var customerNotification = new Notification
                 {
                     Id = Guid.NewGuid(),
-                    UserId = null,
+                    UserId = evt.UserId,
                     Type = "DeliverySucceeded_Customer",
+                    Title = "DeliverySucceeded_Customer",
                     Message = $"Your order {evt.OrderId} has been delivered successfully",
                     CreatedAt = DateTime.UtcNow
                 };
 
-                var sellerNotification = new Notification
-                {
-                    Id = Guid.NewGuid(),
-                    UserId = null,
-                    Type = "DeliverySucceeded_Seller",
-                    Message = $"Order {evt.OrderId} has been delivered successfully",
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                var adminNotification = new Notification
-                {
-                    Id = Guid.NewGuid(),
-                    UserId = null,
-                    Type = "DeliverySucceeded_Admin",
-                    Message = $"Order {evt.OrderId} delivered (payment method: {evt.PaymentMethod})",
-                    CreatedAt = DateTime.UtcNow
-                };
-
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                if (!await NotificationServices.ShouldCreateAsync(db, evt.UserId!, customerNotification.Message)) { Console.WriteLine("SKIP duplicate notification"); return; }
                 await repo.AddAsync(customerNotification);
-                await repo.AddAsync(sellerNotification);
-                await repo.AddAsync(adminNotification);
                 await repo.SaveChangesAsync();
             };
             channel.BasicConsume(
-                queue: "DeliverySucceededEvent",
+                queue: "NotificationService.DeliverySucceededEvent",
                 autoAck: true,
                 consumer: consumer
             );
         }
     }
 }
+
+
+
