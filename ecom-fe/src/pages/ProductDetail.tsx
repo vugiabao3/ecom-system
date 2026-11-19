@@ -29,7 +29,7 @@ export default function ProductDetail() {
         setError(null);
 
         Promise.all([
-            getProductById(id).then((res) => setProduct(res.data)),
+            getProductById(id).then((res: any) => setProduct(res.data)),
             getInventoryByProductId(id)
                 .then((res) => setInventory(res.data))
                 .catch(() => setInventory({ productId: id, available: 0, reserved: 0 })),

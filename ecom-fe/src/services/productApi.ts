@@ -1,4 +1,6 @@
 import api from "./productApiClient";
+import { isDemoMode } from "../demo/store";
+import { demoProductApi } from "../demo/services";
 
 export interface ProductItem {
     id: string;
@@ -49,13 +51,16 @@ export interface UpdateProductRequest {
 }
 
 export const getProducts = (params?: GetProductsParams) => {
+    if (isDemoMode()) return demoProductApi.getProducts(params) as any;
     return api.get("/api/Products", {
         params,
     });
 };
 
-export const getProductById = (id: string) =>
-    api.get(`/api/Products/${id}`);
+export const getProductById = (id: string) => {
+    if (isDemoMode()) return demoProductApi.getProductById(id) as any;
+    return api.get(`/api/Products/${id}`);
+};
 
 export const getProductsByIds = (ids: string[]) =>
     api.post("/api/Products/batch", ids);
@@ -144,3 +149,4 @@ export const createProductVariant = (productId: string, data: any) =>
 
 export const getProductVariant = (productId: string, variantId: string) =>
     api.get(`/api/Products/${productId}/variants/${variantId}`);
+
