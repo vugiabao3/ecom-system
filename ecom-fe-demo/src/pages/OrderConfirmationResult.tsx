@@ -22,7 +22,7 @@ export default function OrderConfirmationResult() {
         setLoading(true);
         setError(null);
         getOrderConfirmation(id)
-            .then((res) => {
+            .then((res: any) => {
                 setOrder(res.data);
             })
             .catch((err: any) => {

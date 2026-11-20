@@ -1,4 +1,6 @@
 import api from "./authApiClient";
+import { isDemoMode } from "../demo/store";
+import { demoAuthApi } from "../demo/services";
 
 export interface LoginRequest {
     email: string;
@@ -37,20 +39,30 @@ export interface AuthResponse {
 export const login = (data: LoginRequest) =>
     api.post<AuthResponse>("/auth/login", data);
 
-export const register = (data: RegisterRequest) =>
-    api.post("/auth/register", data);
+export const register = (data: RegisterRequest) => {
+    if (isDemoMode()) return demoAuthApi.register(data) as any;
+    return api.post("/auth/register", data);
+};
 
-export const forgotPassword = (data: ForgotPasswordRequest) =>
-    api.post("/auth/forgot-password", data);
+export const forgotPassword = (data: ForgotPasswordRequest) => {
+    if (isDemoMode()) return demoAuthApi.forgotPassword(data) as any;
+    return api.post("/auth/forgot-password", data);
+};
 
-export const resetPassword = (data: ResetPasswordRequest) =>
-    api.post("/auth/reset-password", data);
+export const resetPassword = (data: ResetPasswordRequest) => {
+    if (isDemoMode()) return demoAuthApi.resetPassword(data) as any;
+    return api.post("/auth/reset-password", data);
+};
 
-export const changePassword = (data: ChangePasswordRequest) =>
-    api.post("/auth/change-password", data);
+export const changePassword = (data: ChangePasswordRequest) => {
+    if (isDemoMode()) return demoAuthApi.changePassword(data) as any;
+    return api.post("/auth/change-password", data);
+};
 
-export const logout = (data: { refreshToken: string }) =>
-    api.post("/auth/logout", data);
+export const logout = (data: { refreshToken: string }) => {
+    if (isDemoMode()) return demoAuthApi.logout() as any;
+    return api.post("/auth/logout", data);
+};
 
 export const refresh = (data: { refreshToken: string }) =>
     api.post<AuthResponse>("/auth/refresh", data);
@@ -58,21 +70,31 @@ export const refresh = (data: { refreshToken: string }) =>
 export const googleLogin = (data: GoogleLoginRequest) =>
     api.post<AuthResponse>("/auth/oauth/google", data);
 
-export const verifyEmail = (data: { token: string }) =>
-    api.post("/auth/verify-email", data);
+export const verifyEmail = (data: { token: string }) => {
+    if (isDemoMode()) return demoAuthApi.verifyEmail() as any;
+    return api.post("/auth/verify-email", data);
+};
 
-export const resendVerification = (data: { email: string }) =>
-    api.post("/auth/resend-verification", data);
+export const resendVerification = (data: { email: string }) => {
+    if (isDemoMode()) return demoAuthApi.resendVerification() as any;
+    return api.post("/auth/resend-verification", data);
+};
 
-export const logoutAll = () =>
-    api.post("/auth/logout-all");
+export const logoutAll = () => {
+    if (isDemoMode()) return demoAuthApi.logoutAll() as any;
+    return api.post("/auth/logout-all");
+};
 
-export const adminSetRole = (userId: string, role: string) =>
-    api.post("/api/admin/set-role", null, {
+export const adminSetRole = (userId: string, role: string) => {
+    if (isDemoMode()) return demoAuthApi.adminSetRole(userId, role) as any;
+    return api.post("/api/admin/set-role", null, {
         params: { userId, role }
     });
+};
 
-export const adminSetActive = (userId: string, status: string) =>
-    api.post("/api/admin/set-active", null, {
+export const adminSetActive = (userId: string, status: string) => {
+    if (isDemoMode()) return demoAuthApi.adminSetActive(userId, status) as any;
+    return api.post("/api/admin/set-active", null, {
         params: { userId, Status: status }
     });
+};

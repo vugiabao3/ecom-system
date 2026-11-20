@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getProductById, type ProductItem } from "../services/productApi";
 import { getInventoryByProductId, type InventoryDto } from "../services/inventoryApi";
 import { addToCart } from "../services/cartApi";
-import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 import ProductImage from "../components/ProductImage";
 import ProductInfo from "../components/ProductInfo";
@@ -13,7 +12,6 @@ import "../styles/product-detail.css";
 export default function ProductDetail() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { isAdmin } = useAuth();
 
     const [product, setProduct] = useState<ProductItem | null>(null);
     const [inventory, setInventory] = useState<InventoryDto | null>(null);
@@ -31,7 +29,7 @@ export default function ProductDetail() {
         Promise.all([
             getProductById(id).then((res: any) => setProduct(res.data)),
             getInventoryByProductId(id)
-                .then((res) => setInventory(res.data))
+                .then((res: any) => setInventory(res.data))
                 .catch(() => setInventory({ productId: id, available: 0, reserved: 0 })),
         ])
             .catch(() => {
@@ -165,46 +163,42 @@ export default function ProductDetail() {
                     </div>
 
                     <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
-                        {!isAdmin && (
-                            <button
-                                className="add-cart-btn"
-                                onClick={handleAddToCartDirect}
-                                disabled={availableStock <= 0 || adding}
-                                style={{
-                                    flex: 1,
-                                    padding: "14px",
-                                    background: "#fff5f2",
-                                    color: "#ee4d2d",
-                                    border: "1px solid #ee4d2d",
-                                    borderRadius: "8px",
-                                    fontSize: "16px",
-                                    fontWeight: "bold",
-                                    cursor: availableStock <= 0 ? "not-allowed" : "pointer",
-                                }}
-                            >
-                                {adding ? "Adding..." : "🛒 Add To Cart"}
-                            </button>
-                        )}
+                        <button
+                            className="add-cart-btn"
+                            onClick={handleAddToCartDirect}
+                            disabled={availableStock <= 0 || adding}
+                            style={{
+                                flex: 1,
+                                padding: "14px",
+                                background: "#fff5f2",
+                                color: "#ee4d2d",
+                                border: "1px solid #ee4d2d",
+                                borderRadius: "8px",
+                                fontSize: "16px",
+                                fontWeight: "bold",
+                                cursor: availableStock <= 0 ? "not-allowed" : "pointer",
+                            }}
+                        >
+                            {adding ? "Adding..." : "🛒 Add To Cart"}
+                        </button>
 
-                        {!isAdmin && (
-                            <button
-                                onClick={handleBuyNow}
-                                disabled={availableStock <= 0 || adding}
-                                style={{
-                                    flex: 1,
-                                    padding: "14px",
-                                    background: "#ee4d2d",
-                                    color: "white",
-                                    border: "none",
-                                    borderRadius: "8px",
-                                    fontSize: "16px",
-                                    fontWeight: "bold",
-                                    cursor: availableStock <= 0 ? "not-allowed" : "pointer",
-                                }}
-                            >
-                                ⚡ Buy Now
-                            </button>
-                        )}
+                        <button
+                            onClick={handleBuyNow}
+                            disabled={availableStock <= 0 || adding}
+                            style={{
+                                flex: 1,
+                                padding: "14px",
+                                background: "#ee4d2d",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "8px",
+                                fontSize: "16px",
+                                fontWeight: "bold",
+                                cursor: availableStock <= 0 ? "not-allowed" : "pointer",
+                            }}
+                        >
+                            ⚡ Buy Now
+                        </button>
                     </div>
                 </div>
 

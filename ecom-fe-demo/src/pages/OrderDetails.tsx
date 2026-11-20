@@ -20,13 +20,13 @@ export default function OrderDetails() {
         setError(null);
 
         getOrderById(id)
-            .then((res) => {
+            .then((res: any) => {
                 setOrder(res.data);
                 return getShippingStatusByOrderId(id)
-                    .then((sRes) => setShipment(sRes.data))
+                    .then((sRes: any) => setShipment(sRes.data))
                     .catch(() => setShipment(null));
             })
-            .catch((err) => {
+            .catch((err: any) => {
                 console.error(err);
                 setError("Could not load order details.");
             })

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { demoStore, isDemoMode } from "../demo/store";
 
 const api = axios.create({ baseURL: import.meta.env.VITE_NOTIFICATION_API_URL || "http://localhost:5039" });
 api.interceptors.request.use((config) => {
@@ -19,6 +20,39 @@ type Notification = {
   navigationUrl?: string;
 };
 
+function buildDemoNotifications(): Notification[] {
+  const store = demoStore.load();
+  const session = demoStore.loadSession();
+  const userId = session?.userId;
+  const orders = store.orders.filter((o) => !userId || o.userId === userId);
+
+  const orderNotifications: Notification[] = orders.slice(0, 5).map((order) => ({
+    id: `notif-${order.id}`,
+    title: `Order ${order.orderNumber}`,
+    message: `Your order is currently ${order.status.toLowerCase()}. Total ${order.totalPrice.toLocaleString("vi-VN")} đ.`,
+    type: "order",
+    isRead: false,
+    createdAt: order.createdAt,
+    navigationUrl: `/orders/me/${order.id}`,
+  }));
+
+  const activityNotifications: Notification[] = store.activities
+    .filter((activity) => !userId || activity.userId === userId)
+    .slice(0, 3)
+    .map((activity) => ({
+      id: `notif-${activity.id}`,
+      title: activity.action,
+      message: activity.description || activity.action,
+      type: "account",
+      isRead: true,
+      createdAt: activity.createdAt,
+    }));
+
+  return [...orderNotifications, ...activityNotifications].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+}
+
 export default function Notifications() {
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,8 +60,14 @@ export default function Notifications() {
   const load = async () => {
     setLoading(true);
     try {
+      if (isDemoMode()) {
+        setItems(buildDemoNotifications());
+        return;
+      }
       const res = await api.get<Notification[]>("/api/notifications");
       setItems(res.data);
+    } catch {
+      setItems([]);
     } finally {
       setLoading(false);
     }
@@ -36,12 +76,26 @@ export default function Notifications() {
   useEffect(() => { load(); }, []);
 
   const markRead = async (id: string) => {
-    await api.patch(`/api/notifications/${id}/read`);
+    if (!isDemoMode()) {
+      try {
+        await api.patch(`/api/notifications/${id}/read`);
+      } catch {
+        return;
+      }
+    }
     setItems(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
   };
 
   const markAllRead = async () => {
-    await api.post("/api/notifications/read-all");
+    if (isDemoMode()) {
+      setItems(prev => prev.map(n => ({ ...n, isRead: true })));
+      return;
+    }
+    try {
+      await api.post("/api/notifications/read-all");
+    } catch {
+      // keep the current view if the notification service is unavailable
+    }
     await load();
   };
 

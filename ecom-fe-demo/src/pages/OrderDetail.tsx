@@ -22,7 +22,7 @@ export default function OrderDetail() {
         setLoading(true);
         setError(null);
         getMyOrderDetail(orderId)
-            .then((res) => {
+            .then((res: any) => {
                 setOrder(res.data);
             })
             .catch((err: any) => {

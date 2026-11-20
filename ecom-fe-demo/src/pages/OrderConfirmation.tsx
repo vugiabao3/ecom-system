@@ -28,7 +28,7 @@ export default function OrderConfirmation() {
         setLoading(true);
         setError(null);
         confirmCheckout({ checkoutId })
-            .then((res) => {
+            .then((res: any) => {
                 setConfirmation(res.data);
                 setConfirmed(true);
             })
@@ -45,7 +45,7 @@ export default function OrderConfirmation() {
         setConfirming(true);
         setError(null);
         confirmCheckout({ checkoutId })
-            .then((res) => {
+            .then((res: any) => {
                 setConfirmation(res.data);
                 setConfirmed(true);
             })

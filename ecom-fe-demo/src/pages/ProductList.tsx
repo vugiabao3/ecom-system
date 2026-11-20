@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import SearchBar from "../components/SearchBar";
 import FilterBar from "../components/FilterBar";
@@ -7,6 +8,7 @@ import { getProducts, searchProducts, type ProductItem } from "../services/produ
 import "../styles/product.css";
 
 export default function ProductList() {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [products, setProducts] = useState<ProductItem[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -21,7 +23,19 @@ export default function ProductList() {
         minPrice?: number;
         maxPrice?: number;
         sortBy?: string;
-    }>({ sortBy: "newest" });
+    }>(() => {
+        const category = searchParams.get("category");
+        return { sortBy: "newest", categoryId: category ? Number(category) : undefined };
+    });
+
+    const categoryParam = searchParams.get("category");
+
+    useEffect(() => {
+        if (!categoryParam) return;
+        const categoryId = Number(categoryParam);
+        setFilters((prev) => (prev.categoryId === categoryId ? prev : { ...prev, categoryId }));
+        setPage(1);
+    }, [categoryParam]);
 
     const fetchProducts = useCallback(async () => {
         setLoading(true);
@@ -71,6 +85,11 @@ export default function ProductList() {
     const handleFilterChange = (newFilters: typeof filters) => {
         setFilters(newFilters);
         setPage(1);
+
+        const next = new URLSearchParams(searchParams);
+        if (newFilters.categoryId) next.set("category", String(newFilters.categoryId));
+        else next.delete("category");
+        setSearchParams(next, { replace: true });
     };
 
     const totalPages = Math.ceil(totalCount / pageSize) || 1;

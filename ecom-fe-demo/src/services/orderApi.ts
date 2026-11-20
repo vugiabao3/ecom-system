@@ -1,4 +1,6 @@
 import api from "./orderApiClient";
+import { isDemoMode } from "../demo/store";
+import { demoOrderApi } from "../demo/services";
 
 export interface CreateOrderRequest {
     address: string;
@@ -143,42 +145,52 @@ export interface CheckoutSessionDto {
 }
 
 export const createOrder = (data: CreateOrderRequest) => {
+    if (isDemoMode()) return demoOrderApi.createOrder(data) as any;
     return api.post<CreateOrderResponse>("/api/Orders/checkout", data);
 };
 
 export const getOrderById = (id: string) => {
+    if (isDemoMode()) return demoOrderApi.getOrderById(id) as any;
     return api.get<OrderDto>(`/api/Orders/${id}`);
 };
 
 export const getOrdersByUserId = (userId: string) => {
+    if (isDemoMode()) return demoOrderApi.getOrdersByUserId(userId) as any;
     return api.get<OrderDto[]>(`/api/Orders/user/${userId}`);
 };
 
 export const getOrdersBySellerId = (sellerId: string) => {
+    if (isDemoMode()) return demoOrderApi.getOrdersBySellerId(sellerId) as any;
     return api.get<OrderDto[]>(`/api/Orders/seller/${sellerId}`);
 };
 
 export const updateOrderStatus = (id: string, status: string) => {
+    if (isDemoMode()) return demoOrderApi.updateOrderStatus(id, status) as any;
     return api.put(`/api/Orders/${id}/status`, { status });
 };
 
 export const cancelOrder = (id: string) => {
+    if (isDemoMode()) return demoOrderApi.cancelOrder(id) as any;
     return api.post(`/api/Orders/${id}/cancel`, {});
 };
 
 export const previewOrder = (data: PreviewRequest) => {
+    if (isDemoMode()) return demoOrderApi.previewOrder(data) as any;
     return api.post<PreviewResponse>("/api/Orders/preview", data);
 };
 
 export const validateOrder = (data: ValidateRequest) => {
+    if (isDemoMode()) return demoOrderApi.validateOrder(data) as any;
     return api.post<ValidateResponse>("/api/Orders/validate", data);
 };
 
 export const calculateOrder = (data: CalculateRequest) => {
+    if (isDemoMode()) return demoOrderApi.calculateOrder(data) as any;
     return api.post<CalculateResponse>("/api/Orders/calculate", data);
 };
 
 export const getCheckoutSession = (checkoutId: string) => {
+    if (isDemoMode()) return demoOrderApi.getCheckoutSession(checkoutId) as any;
     return api.get<CheckoutSessionDto>(`/api/Orders/checkout/${checkoutId}`);
 };
 
@@ -195,11 +207,13 @@ export interface OrderConfirmationResponse {
 }
 
 export const confirmCheckout = (data: ConfirmCheckoutRequest) => {
+    if (isDemoMode()) return demoOrderApi.confirmCheckout(data) as any;
     return api.post<OrderConfirmationResponse>("/api/Orders/checkout/confirm", data);
 };
 
 // Order confirmation
 export const getOrderConfirmation = (orderId: string) => {
+    if (isDemoMode()) return demoOrderApi.getOrderConfirmation(orderId) as any;
     return api.get<OrderDetailDto>(`/api/Orders/${orderId}/confirmation`);
 };
 
@@ -239,6 +253,7 @@ export interface PaginatedOrderResponse {
 }
 
 export const getMyOrders = (params: MyOrdersRequest) => {
+    if (isDemoMode()) return demoOrderApi.getMyOrders(params) as any;
     return api.get<PaginatedOrderResponse>("/api/Orders/me", {
         params: {
             page: params.page ?? 1,
@@ -264,6 +279,7 @@ export interface OrderSummaryDto {
 }
 
 export const getOrderSummary = () => {
+    if (isDemoMode()) return demoOrderApi.getOrderSummary() as any;
     return api.get<OrderSummaryDto>("/api/Orders/me/summary");
 };
 
@@ -321,6 +337,7 @@ export interface OrderDetailDto {
 }
 
 export const getMyOrderDetail = (orderId: string) => {
+    if (isDemoMode()) return demoOrderApi.getMyOrderDetail(orderId) as any;
     return api.get<OrderDetailDto>(`/api/Orders/me/${orderId}`);
 };
 
@@ -332,6 +349,7 @@ export interface RecentOrdersRequest {
 }
 
 export const getRecentOrders = (params: RecentOrdersRequest) => {
+    if (isDemoMode()) return demoOrderApi.getRecentOrders(params) as any;
     return api.get<PaginatedOrderResponse>("/api/Orders/me/recent", {
         params: {
             page: params.page ?? 1,
@@ -349,6 +367,7 @@ export interface SearchOrdersRequest {
 }
 
 export const searchOrders = (params: SearchOrdersRequest) => {
+    if (isDemoMode()) return demoOrderApi.searchOrders(params) as any;
     return api.get<PaginatedOrderResponse>("/api/Orders/me/search", {
         params: {
             searchTerm: params.searchTerm,
@@ -366,6 +385,7 @@ export interface FilterOrdersByStatusRequest {
 }
 
 export const filterOrdersByStatus = (params: FilterOrdersByStatusRequest) => {
+    if (isDemoMode()) return demoOrderApi.filterOrdersByStatus(params) as any;
     return api.get<PaginatedOrderResponse>("/api/Orders/me/filter", {
         params: {
             statusFilter: params.statusFilter,
@@ -382,6 +402,7 @@ export interface PendingOrdersRequest {
 }
 
 export const getPendingOrders = (params: PendingOrdersRequest) => {
+    if (isDemoMode()) return demoOrderApi.getPendingOrders(params) as any;
     return api.get<PaginatedOrderResponse>("/api/Orders/me/pending", {
         params: {
             page: params.page ?? 1,
@@ -397,6 +418,7 @@ export interface ProcessingOrdersRequest {
 }
 
 export const getProcessingOrders = (params: ProcessingOrdersRequest) => {
+    if (isDemoMode()) return demoOrderApi.getProcessingOrders(params) as any;
     return api.get<PaginatedOrderResponse>("/api/Orders/me/processing", {
         params: {
             page: params.page ?? 1,
@@ -412,6 +434,7 @@ export interface ShippingOrdersRequest {
 }
 
 export const getShippingOrders = (params: ShippingOrdersRequest) => {
+    if (isDemoMode()) return demoOrderApi.getShippingOrders(params) as any;
     return api.get<PaginatedOrderResponse>("/api/Orders/me/shipping", {
         params: {
             page: params.page ?? 1,
@@ -427,6 +450,7 @@ export interface CompletedOrdersRequest {
 }
 
 export const getCompletedOrders = (params: CompletedOrdersRequest) => {
+    if (isDemoMode()) return demoOrderApi.getCompletedOrders(params) as any;
     return api.get<PaginatedOrderResponse>("/api/Orders/me/completed", {
         params: {
             page: params.page ?? 1,
@@ -442,6 +466,7 @@ export interface CancelledOrdersRequest {
 }
 
 export const getCancelledOrders = (params: CancelledOrdersRequest) => {
+    if (isDemoMode()) return demoOrderApi.getCancelledOrders(params) as any;
     return api.get<PaginatedOrderResponse>("/api/Orders/me/cancelled", {
         params: {
             page: params.page ?? 1,
@@ -457,6 +482,7 @@ export interface ReturnedOrdersRequest {
 }
 
 export const getReturnedOrders = (params: ReturnedOrdersRequest) => {
+    if (isDemoMode()) return demoOrderApi.getReturnedOrders(params) as any;
     return api.get<PaginatedOrderResponse>("/api/Orders/me/returned", {
         params: {
             page: params.page ?? 1,
@@ -467,5 +493,6 @@ export const getReturnedOrders = (params: ReturnedOrdersRequest) => {
 
 // Order timeline (status history)
 export const getOrderTimeline = (orderId: string) => {
+    if (isDemoMode()) return demoOrderApi.getOrderTimeline(orderId) as any;
     return api.get<OrderStatusHistoryDto[]>(`/api/Orders/me/${orderId}/timeline`);
 };

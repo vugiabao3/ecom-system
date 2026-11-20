@@ -32,8 +32,8 @@ export default function OrderTimeline() {
         setLoading(true);
         setError(null);
         getOrderTimeline(orderId)
-            .then((res) => {
-                setTimeline(res.data);
+            .then((res: any) => {
+                setTimeline(res.data || []);
             })
             .catch((err: any) => {
                 setError(err.response?.data?.message || "Failed to load order timeline.");

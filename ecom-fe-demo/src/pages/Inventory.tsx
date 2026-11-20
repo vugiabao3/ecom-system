@@ -9,7 +9,7 @@ export default function Inventory() {
   useEffect(() => {
     setLoading(true);
     getInventoryList()
-      .then((res) => setItems(Array.isArray(res.data) ? res.data : res.data.items ?? []))
+      .then((res: any) => setItems(Array.isArray(res.data) ? res.data : res.data.items ?? []))
       .catch(() => setError("Failed to load inventory"))
       .finally(() => setLoading(false));
   }, []);

@@ -9,6 +9,7 @@ import type {
     DemoProduct,
     DemoReview,
     DemoShipment,
+    DemoStore,
     DemoUser,
 } from "./store";
 
@@ -20,6 +21,8 @@ export const demoCategories = [
     { id: 5, name: "Phụ kiện" },
 ];
 
+const SEED_VERSION = 2;
+
 function daysAgo(days: number, hours = 0): string {
     const date = new Date();
     date.setDate(date.getDate() - days);
@@ -30,7 +33,6 @@ function daysAgo(days: number, hours = 0): string {
 export function seedDemoIfEmpty() {
     if (!isDemoMode()) return;
     const existing = demoStore.load();
-    if (existing.products.length > 0) return;
 
     const now = new Date().toISOString();
     const demoHash = hashPassword("111");
@@ -647,7 +649,7 @@ export function seedDemoIfEmpty() {
         { id: "dev1", userId: "u1", deviceInfo: "Chrome on Windows", ipAddress: "127.0.0.1", loginAt: now },
     ];
 
-    demoStore.save({
+    const seedStore = {
         users,
         products,
         coupons,
@@ -661,6 +663,40 @@ export function seedDemoIfEmpty() {
         checkoutSessions: [],
         activities,
         devices,
-        seedVersion: 1,
-    });
+        seedVersion: SEED_VERSION,
+    };
+
+    const mergeById = <T extends { id: string }>(current: T[], defaults: T[]) => {
+        if (!current || current.length === 0) return defaults;
+        const ids = new Set(current.map((item) => item.id));
+        return [...current, ...defaults.filter((item) => !ids.has(item.id))];
+    };
+
+    const mergeUsers = (current: DemoUser[], defaults: DemoUser[]) => {
+        if (!current || current.length === 0) return defaults;
+        const emails = new Set(current.map((user) => user.email.toLowerCase()));
+        return [...current, ...defaults.filter((user) => !emails.has(user.email.toLowerCase()))];
+    };
+
+    const next: DemoStore = {
+        ...seedStore,
+        ...existing,
+        users: mergeUsers(existing.users, seedStore.users),
+        products: mergeById(existing.products, seedStore.products),
+        coupons: mergeById(existing.coupons, seedStore.coupons),
+        orders: mergeById(existing.orders, seedStore.orders),
+        addresses: mergeById(existing.addresses, seedStore.addresses),
+        reviews: mergeById(existing.reviews, seedStore.reviews),
+        shipments: mergeById(existing.shipments, seedStore.shipments),
+        activities: mergeById(existing.activities, seedStore.activities),
+        devices: mergeById(existing.devices, seedStore.devices),
+        payments: mergeById(existing.payments, seedStore.payments),
+        seedVersion: SEED_VERSION,
+    };
+
+    if (existing.cart && existing.cart.items.length > 0) {
+        next.cart = existing.cart;
+    }
+
+    demoStore.save(next);
 }

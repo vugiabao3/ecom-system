@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link, Navigate } from "react-router-dom";
 import { login as apiLogin } from "../services/authApi";
 import { useAuth } from "../context/AuthContext";
 import { isDemoMode } from "../demo/store";
@@ -7,7 +7,9 @@ import "../styles/auth.css";
 
 export default function Login() {
     const navigate = useNavigate();
-    const { login, demoLogin } = useAuth();
+    const location = useLocation();
+    const { login, demoLogin, isAuthenticated, isInitialized } = useAuth();
+    const intendedPath = (location.state as { from?: string } | null)?.from || "/";
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -32,7 +34,7 @@ export default function Login() {
             setLoading(false);
             return;
         }
-        navigate("/");
+        navigate(intendedPath, { replace: true });
         setLoading(false);
     };
 
@@ -52,7 +54,7 @@ export default function Login() {
                     setError("Invalid demo credentials. Use 111@gmail.com / 111.");
                     return;
                 }
-                navigate("/");
+                navigate(intendedPath, { replace: true });
                 return;
             }
             const res = await apiLogin({
@@ -69,13 +71,17 @@ export default function Login() {
             }
 
             login(accessToken, refreshToken);
-            navigate("/");
+            navigate(intendedPath, { replace: true });
         } catch (err: any) {
             setError(err.response?.data?.message || err.response?.data || "Invalid email or password.");
         } finally {
             setLoading(false);
         }
     };
+
+    if (isInitialized && isAuthenticated) {
+        return <Navigate to={intendedPath} replace />;
+    }
 
     return (
         <div className="auth-page">

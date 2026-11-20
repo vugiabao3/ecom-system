@@ -163,6 +163,14 @@ export default function AppRoutes() {
                     }
                 />
                 <Route
+                    path="/orders/me/:orderId"
+                    element={
+                        <ProtectedRoute>
+                            <OrderDetail />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
                     path="/orders/shipping"
                     element={
                         <ProtectedRoute>

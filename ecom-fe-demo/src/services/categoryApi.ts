@@ -1,5 +1,6 @@
 import productApiClient from "./productApiClient";
 import { isDemoMode } from "../demo/store";
+import { demoCategoryApi } from "../demo/services";
 
 export interface CategoryDto {
     id: number;
@@ -13,24 +14,12 @@ export interface CategoryDto {
 }
 
 export const getCategories = () => {
-    if (isDemoMode()) {
-        const cats = [
-            { id: 1, name: "Điện tử" }, { id: 2, name: "Thời trang" }, { id: 3, name: "Gia dụng" },
-            { id: 4, name: "Làm đẹp" }, { id: 5, name: "Phụ kiện" },
-        ];
-        return Promise.resolve({ data: cats });
-    }
+    if (isDemoMode()) return demoCategoryApi.getAll() as any;
     return productApiClient.get<CategoryDto[]>("/api/categories");
 };
 
 export const getCategoryById = (id: number) => {
-    if (isDemoMode()) {
-        const cats: any[] = [
-            { id: 1, name: "Điện tử" }, { id: 2, name: "Thời trang" }, { id: 3, name: "Gia dụng" },
-            { id: 4, name: "Làm đẹp" }, { id: 5, name: "Phụ kiện" },
-        ];
-        return Promise.resolve({ data: cats.find(c => c.id === id) });
-    }
+    if (isDemoMode()) return demoCategoryApi.getById(id) as any;
     return productApiClient.get<CategoryDto>(`/api/categories/${id}`);
 };
 

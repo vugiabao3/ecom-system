@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { getCart } from "../services/cartApi";
 import { Link } from "react-router-dom";
-import { getToken } from "../utils/token";
+import { useAuth } from "../context/AuthContext";
+import { DEMO_UPDATE_EVENT, isDemoMode } from "../demo/store";
 
 export default function CartIcon() {
     const [count, setCount] = useState<number>(0);
+    const { isAuthenticated } = useAuth();
 
     const fetchCart = async () => {
-        if (!getToken()) {
+        if (!isAuthenticated) {
             setCount(0);
             return;
         }
@@ -23,7 +25,14 @@ export default function CartIcon() {
 
     useEffect(() => {
         fetchCart();
-    }, []);
+    }, [isAuthenticated]);
+
+    useEffect(() => {
+        if (!isDemoMode()) return;
+        const handleUpdate = () => fetchCart();
+        window.addEventListener(DEMO_UPDATE_EVENT, handleUpdate);
+        return () => window.removeEventListener(DEMO_UPDATE_EVENT, handleUpdate);
+    }, [isAuthenticated]);
 
     return (
         <Link

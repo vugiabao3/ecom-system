@@ -19,7 +19,7 @@ export default function FilterBar({ onFilterChange }: FilterBarProps) {
 
     useEffect(() => {
         getCategories()
-            .then((res) => setCategories(res.data || []))
+            .then((res: any) => setCategories(res.data || []))
             .catch(() => setCategories([]));
     }, []);
 
