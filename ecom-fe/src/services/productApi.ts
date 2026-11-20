@@ -77,6 +77,7 @@ export const searchProducts = (paramsOrKeyword: string | SearchProductsParams) =
             ? { keyword: paramsOrKeyword }
             : paramsOrKeyword;
 
+    if (isDemoMode()) return demoProductApi.searchProducts(params) as any;
     return api.get("/api/Products/search", {
         params,
     });
