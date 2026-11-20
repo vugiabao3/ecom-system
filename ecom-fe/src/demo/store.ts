@@ -177,7 +177,13 @@ function save(store: DemoStore) {
 }
 
 export function isDemoMode(): boolean {
-    return import.meta.env.VITE_DEMO_MODE === "true";
+    if (import.meta.env.VITE_DEMO_MODE === "true") return true;
+    if (import.meta.env.VITE_DEMO_MODE === "false") return false;
+    try {
+        const host = window.location.hostname;
+        if (host.endsWith("pages.dev") || host.includes("ecom-system")) return true;
+    } catch {}
+    return false;
 }
 
 export function getEnv(): Record<string, string> {
